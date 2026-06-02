@@ -57,30 +57,36 @@ require_once '../includes/admin_head.php';
                 <div class="topbar-sub"><?= $months[$filterMonth] ?> <?= $filterYear ?></div>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <form method="GET" class="d-flex gap-2 align-items-center">
-                <select name="month" class="form-select form-select-sm" style="width:130px;">
-                    <?php foreach ($months as $n=>$name): ?>
-                        <option value="<?= $n ?>" <?= $filterMonth===$n?'selected':'' ?>><?= $name ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <select name="year" class="form-select form-select-sm" style="width:85px;">
-                    <?php foreach ($years as $y): ?>
-                        <option value="<?= $y ?>" <?= $filterYear===$y?'selected':'' ?>><?= $y ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <button type="submit" class="btn btn-dark btn-sm px-3"><i class="bi bi-funnel me-1"></i>Filter</button>
-            </form>
-            <a href="reports.php?month=<?= $filterMonth ?>&year=<?= $filterYear ?>&export=csv"
-               class="btn btn-sm btn-outline-secondary px-3">
-                <i class="bi bi-download me-1"></i> Export CSV
-            </a>
+        <div class="d-flex align-items-center gap-2">
             <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
             <div class="topbar-avatar"><?= strtoupper(substr($_SESSION['name'],0,1)) ?></div>
         </div>
     </div>
 
     <div class="p-3 p-md-4">
+
+        <!-- Filter Bar -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-body py-3">
+                <form method="GET" class="d-flex gap-2 align-items-center flex-wrap">
+                    <select name="month" class="form-select form-select-sm" style="width:130px;">
+                        <?php foreach ($months as $n=>$name): ?>
+                            <option value="<?= $n ?>" <?= $filterMonth===$n?'selected':'' ?>><?= $name ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <select name="year" class="form-select form-select-sm" style="width:85px;">
+                        <?php foreach ($years as $y): ?>
+                            <option value="<?= $y ?>" <?= $filterYear===$y?'selected':'' ?>><?= $y ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="btn btn-dark btn-sm px-3"><i class="bi bi-funnel me-1"></i>Filter</button>
+                    <a href="reports.php?month=<?= $filterMonth ?>&year=<?= $filterYear ?>&export=csv"
+                       class="btn btn-sm btn-outline-secondary px-3 ms-auto">
+                        <i class="bi bi-download me-1"></i> Export CSV
+                    </a>
+                </form>
+            </div>
+        </div>
 
         <!-- Summary Cards -->
         <div class="row g-3 mb-4">
@@ -112,7 +118,7 @@ require_once '../includes/admin_head.php';
 
         <div class="row g-4">
             <!-- Left col -->
-            <div class="col-lg-8">
+            <div class="col-lg-8 order-2 order-lg-1">
 
                 <!-- Booking Summary -->
                 <div class="dash-card mb-4">
@@ -125,7 +131,7 @@ require_once '../includes/admin_head.php';
                         </div>
                     </div>
                     <div class="table-responsive">
-                        <table class="table modern-table mb-0">
+                        <table class="table modern-table mobile-cards mb-0">
                             <thead>
                                 <tr><th>#</th><th>Client</th><th>Package</th><th>Date</th><th>Event Type</th><th>Status</th></tr>
                             </thead>
@@ -135,12 +141,12 @@ require_once '../includes/admin_head.php';
                             <?php else: ?>
                                 <?php foreach ($bookings as $b): ?>
                                 <tr>
-                                    <td class="text-muted"><?= (int)$b['id'] ?></td>
-                                    <td class="fw-semibold"><?= htmlspecialchars($b['client']) ?></td>
-                                    <td><?= htmlspecialchars($b['package']) ?></td>
-                                    <td><?= htmlspecialchars($b['booking_date']) ?></td>
-                                    <td><?= htmlspecialchars($b['event_type']??'—') ?></td>
-                                    <td><span class="badge bg-<?= $statusBadge[$b['status']]??'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
+                                    <td data-label="#" class="text-muted"><?= (int)$b['id'] ?></td>
+                                    <td data-label="Client" class="fw-semibold"><?= htmlspecialchars($b['client']) ?></td>
+                                    <td data-label="Package"><?= htmlspecialchars($b['package']) ?></td>
+                                    <td data-label="Date"><?= htmlspecialchars($b['booking_date']) ?></td>
+                                    <td data-label="Event"><?= htmlspecialchars($b['event_type']??'—') ?></td>
+                                    <td data-label="Status"><span class="badge bg-<?= $statusBadge[$b['status']]??'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -156,7 +162,7 @@ require_once '../includes/admin_head.php';
                         <span style="font-size:.8rem;color:#888;">Retained: <strong>₱<?= number_format($totalRetained,2) ?></strong></span>
                     </div>
                     <div class="table-responsive">
-                        <table class="table modern-table mb-0">
+                        <table class="table modern-table mobile-cards mb-0">
                             <thead>
                                 <tr><th>Client</th><th>Package</th><th>Booking Date</th><th>Reason</th><th>Deposit Paid</th><th>Retained</th><th>Refundable</th><th>Cancelled</th></tr>
                             </thead>
@@ -166,14 +172,14 @@ require_once '../includes/admin_head.php';
                             <?php else: ?>
                                 <?php foreach ($cancellations as $c): $refundable = max(0,(float)$c['deposit_amount']-(float)$c['deposit_retained']); ?>
                                 <tr>
-                                    <td class="fw-semibold"><?= htmlspecialchars($c['client']) ?></td>
-                                    <td><?= htmlspecialchars($c['package']) ?></td>
-                                    <td><?= htmlspecialchars($c['booking_date']) ?></td>
-                                    <td style="max-width:140px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars($c['reason']?:'—') ?></div></td>
-                                    <td>₱<?= number_format((float)$c['deposit_amount'],2) ?></td>
-                                    <td class="text-danger fw-semibold">₱<?= number_format((float)$c['deposit_retained'],2) ?></td>
-                                    <td class="text-success fw-semibold">₱<?= number_format($refundable,2) ?></td>
-                                    <td><?= date('M d, Y', strtotime($c['cancelled_at'])) ?></td>
+                                    <td data-label="Client" class="fw-semibold"><?= htmlspecialchars($c['client']) ?></td>
+                                    <td data-label="Package"><?= htmlspecialchars($c['package']) ?></td>
+                                    <td data-label="Date"><?= htmlspecialchars($c['booking_date']) ?></td>
+                                    <td data-label="Reason" style="max-width:140px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars($c['reason']?:'—') ?></div></td>
+                                    <td data-label="Deposit Paid">₱<?= number_format((float)$c['deposit_amount'],2) ?></td>
+                                    <td data-label="Retained" class="text-danger fw-semibold">₱<?= number_format((float)$c['deposit_retained'],2) ?></td>
+                                    <td data-label="Refundable" class="text-success fw-semibold">₱<?= number_format($refundable,2) ?></td>
+                                    <td data-label="Cancelled"><?= date('M d, Y', strtotime($c['cancelled_at'])) ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -184,48 +190,54 @@ require_once '../includes/admin_head.php';
             </div>
 
             <!-- Right col -->
-            <div class="col-lg-4">
+            <div class="col-lg-4 order-1 order-lg-2">
+                <div class="row g-3 g-lg-4">
 
                 <!-- Post-Production Rate -->
-                <div class="dash-card mb-4">
+                <div class="col-6 col-lg-12">
+                <div class="dash-card">
                     <div class="dash-card-header"><h6>Post-Production Rate</h6></div>
                     <div class="dash-card-body text-center">
                         <div class="mx-auto mb-3 d-flex flex-column align-items-center justify-content-center"
-                             style="width:100px;height:100px;border-radius:50%;border:8px solid #e8e8e8;">
-                            <span style="font-size:1.5rem;font-weight:800;color:#111;line-height:1;"><?= $ppRate ?>%</span>
-                            <span style="font-size:.63rem;color:#aaa;">Completion</span>
+                             style="width:80px;height:80px;border-radius:50%;border:7px solid #e8e8e8;">
+                            <span style="font-size:1.25rem;font-weight:800;color:#111;line-height:1;"><?= $ppRate ?>%</span>
+                            <span style="font-size:.6rem;color:#aaa;">Done</span>
                         </div>
-                        <div class="progress mb-2" style="height:7px;">
-                            <div class="progress-bar bg-dark" role="progressbar" style="width:<?= $ppRate ?>%" aria-valuenow="<?= $ppRate ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress mb-2" style="height:6px;">
+                            <div class="progress-bar bg-dark" role="progressbar" style="width:<?= $ppRate ?>%"></div>
                         </div>
-                        <div style="font-size:.8rem;color:#888;"><?= $ppCompleted ?> of <?= $ppTotal ?> project(s) completed</div>
+                        <div style="font-size:.78rem;color:#888;"><?= $ppCompleted ?> / <?= $ppTotal ?> completed</div>
                     </div>
+                </div>
                 </div>
 
                 <!-- Revenue Breakdown -->
-                <div class="dash-card mb-4">
-                    <div class="dash-card-header"><h6>Revenue Breakdown</h6></div>
+                <div class="col-6 col-lg-12">
+                <div class="dash-card">
+                    <div class="dash-card-header"><h6>Revenue</h6></div>
                     <div class="dash-card-body p-0">
                         <?php
                         $revItems = [
-                            ['Total Billed',       '₱'.number_format((float)$revenue['total_billed'],2),     ''],
-                            ['Collected',          '₱'.number_format((float)$revenue['total_collected'],2),  'text-success'],
-                            ['Outstanding',        '₱'.number_format((float)$revenue['total_outstanding'],2),'text-danger'],
-                            ['Deposits Retained',  '₱'.number_format((float)$totalRetained,2),               ''],
+                            ['Billed',      '₱'.number_format((float)$revenue['total_billed'],2),     ''],
+                            ['Collected',   '₱'.number_format((float)$revenue['total_collected'],2),  'text-success'],
+                            ['Outstanding', '₱'.number_format((float)$revenue['total_outstanding'],2),'text-danger'],
+                            ['Retained',    '₱'.number_format((float)$totalRetained,2),               ''],
                         ];
                         ?>
                         <?php foreach ($revItems as [$label,$val,$cls]): ?>
-                        <div class="d-flex justify-content-between align-items-center px-4 py-3" style="border-bottom:1px solid #f0f0f0;">
-                            <span style="font-size:.84rem;color:#666;"><?= $label ?></span>
+                        <div class="d-flex justify-content-between align-items-center px-3 py-2" style="border-bottom:1px solid #f0f0f0;font-size:.82rem;">
+                            <span style="color:#666;"><?= $label ?></span>
                             <span class="fw-semibold <?= $cls ?>"><?= $val ?></span>
                         </div>
                         <?php endforeach; ?>
                     </div>
                 </div>
+                </div>
 
                 <!-- Status Breakdown -->
+                <div class="col-12">
                 <div class="dash-card">
-                    <div class="dash-card-header"><h6>Booking Status Breakdown</h6></div>
+                    <div class="dash-card-header"><h6>Booking Status</h6></div>
                     <div class="dash-card-body">
                         <?php $total = count($bookings) ?: 1; foreach (['approved','pending','rescheduled','cancelled'] as $s): $pct = round(($statusCounts[$s]/$total)*100); ?>
                         <div class="mb-3">
@@ -239,6 +251,9 @@ require_once '../includes/admin_head.php';
                         </div>
                         <?php endforeach; ?>
                     </div>
+                </div>
+                </div>
+
                 </div>
             </div>
         </div>

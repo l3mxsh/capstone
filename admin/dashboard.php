@@ -121,7 +121,7 @@ require_once '../includes/admin_head.php';
                         </a>
                     </div>
                     <div class="table-responsive">
-                        <table class="table modern-table mb-0">
+                        <table class="table modern-table mobile-cards mb-0">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -137,16 +137,16 @@ require_once '../includes/admin_head.php';
                             <?php else: ?>
                                 <?php foreach ($recentBookings as $b): ?>
                                 <tr>
-                                    <td class="text-muted">#<?= (int)$b['id'] ?></td>
-                                    <td>
+                                    <td data-label="#" class="text-muted">#<?= (int)$b['id'] ?></td>
+                                    <td data-label="Client">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="avatar-sm"><?= strtoupper(substr($b['client'],0,1)) ?></span>
                                             <span class="fw-semibold"><?= htmlspecialchars($b['client']) ?></span>
                                         </div>
                                     </td>
-                                    <td><?= htmlspecialchars($b['package']) ?></td>
-                                    <td><?= htmlspecialchars($b['booking_date']) ?></td>
-                                    <td><span class="badge bg-<?= $statusBadge[$b['status']] ?? 'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
+                                    <td data-label="Package"><?= htmlspecialchars($b['package']) ?></td>
+                                    <td data-label="Date"><?= htmlspecialchars($b['booking_date']) ?></td>
+                                    <td data-label="Status"><span class="badge bg-<?= $statusBadge[$b['status']] ?? 'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>

@@ -83,7 +83,7 @@ require_once '../includes/admin_head.php';
                 </button>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>#</th><th>Name</th><th>Description</th><th>Price</th><th>Status</th><th>Actions</th></tr>
                     </thead>
@@ -95,42 +95,35 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($packages as $pkg): ?>
                         <tr>
-                            <td class="text-muted"><?= (int)$pkg['id'] ?></td>
-                            <td class="fw-semibold"><?= htmlspecialchars($pkg['name']) ?></td>
-                            <td class="text-muted" style="max-width:240px;">
+                            <td data-label="#" class="text-muted"><?= (int)$pkg['id'] ?></td>
+                            <td data-label="Name" class="fw-semibold"><?= htmlspecialchars($pkg['name']) ?></td>
+                            <td data-label="Description" class="text-muted" style="max-width:240px;">
                                 <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                                     <?= htmlspecialchars($pkg['description']) ?>
                                 </div>
                             </td>
-                            <td class="fw-semibold">₱<?= number_format((float)$pkg['price'],2) ?></td>
-                            <td>
+                            <td data-label="Price" class="fw-semibold">₱<?= number_format((float)$pkg['price'],2) ?></td>
+                            <td data-label="Status">
                                 <span class="badge <?= $pkg['status']==='active'?'bg-success':'bg-secondary' ?>">
                                     <?= ucfirst($pkg['status']) ?>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Actions">
                                 <div class="d-flex gap-1">
                                     <button class="btn-action" title="Edit"
                                             onclick="openEditModal(<?= htmlspecialchars(json_encode($pkg),ENT_QUOTES) ?>)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <?php if ($pkg['status'] === 'active'): ?>
-                                        <form method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="archive">
-                                            <input type="hidden" name="id" value="<?= (int)$pkg['id'] ?>">
-                                            <button type="submit" class="btn-action warning" title="Archive"
-                                                    onclick="return confirm('Archive this package?')">
-                                                <i class="bi bi-archive"></i>
-                                            </button>
-                                        </form>
+                                        <button class="btn-action warning" title="Archive"
+                                                onclick="openArchiveModal(<?= (int)$pkg['id'] ?>, '<?= htmlspecialchars(addslashes($pkg['name'])) ?>')">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
                                     <?php else: ?>
-                                        <form method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="restore">
-                                            <input type="hidden" name="id" value="<?= (int)$pkg['id'] ?>">
-                                            <button type="submit" class="btn-action success" title="Restore">
-                                                <i class="bi bi-arrow-counterclockwise"></i>
-                                            </button>
-                                        </form>
+                                        <button class="btn-action success" title="Restore"
+                                                onclick="openRestoreModal(<?= (int)$pkg['id'] ?>, '<?= htmlspecialchars(addslashes($pkg['name'])) ?>')">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -144,9 +137,32 @@ require_once '../includes/admin_head.php';
     </div>
 </div>
 
+<!-- Archive/Restore Modal -->
+<div class="modal fade" id="archiveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST">
+            <input type="hidden" name="action" id="archiveAction">
+            <input type="hidden" name="id" id="archiveId">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title" id="archiveTitle">Archive Package</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" style="font-size:.875rem;">Are you sure you want to <span id="archiveVerb">archive</span> <strong id="archiveName"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark btn-sm" id="archiveBtn">Confirm</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Add/Edit Modal -->
 <div class="modal fade" id="packageModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <form method="POST" id="packageForm">
             <input type="hidden" name="action" id="formAction" value="add">
             <input type="hidden" name="id" id="formId">
@@ -195,6 +211,22 @@ require_once '../includes/admin_head.php';
 <script>
     document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('show'));
 
+    function openArchiveModal(id, name) {
+        document.getElementById('archiveAction').value = 'archive';
+        document.getElementById('archiveId').value = id;
+        document.getElementById('archiveName').textContent = name;
+        document.getElementById('archiveVerb').textContent = 'archive';
+        document.getElementById('archiveTitle').textContent = 'Archive Package';
+        new bootstrap.Modal(document.getElementById('archiveModal')).show();
+    }
+    function openRestoreModal(id, name) {
+        document.getElementById('archiveAction').value = 'restore';
+        document.getElementById('archiveId').value = id;
+        document.getElementById('archiveName').textContent = name;
+        document.getElementById('archiveVerb').textContent = 'restore';
+        document.getElementById('archiveTitle').textContent = 'Restore Package';
+        new bootstrap.Modal(document.getElementById('archiveModal')).show();
+    }
     function openAddModal() {
         document.getElementById('packageModalLabel').textContent = 'Add Package';
         document.getElementById('formAction').value = 'add';

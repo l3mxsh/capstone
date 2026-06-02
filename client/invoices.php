@@ -71,7 +71,7 @@ require_once '../includes/client_head.php';
                         <h6>Invoice History <span class="badge bg-secondary ms-2"><?= count($invoices) ?></span></h6>
                     </div>
                     <div class="table-responsive">
-                        <table class="table modern-table mb-0">
+                        <table class="table modern-table mobile-cards mb-0">
                             <thead>
                                 <tr><th>Invoice #</th><th>Package</th><th>Event Date</th><th>Total</th><th>Paid</th><th>Balance</th><th>Status</th><th>Action</th></tr>
                             </thead>
@@ -83,14 +83,14 @@ require_once '../includes/client_head.php';
                             <?php else: ?>
                                 <?php foreach ($invoices as $inv): ?>
                                 <tr>
-                                    <td class="fw-bold">#<?= str_pad((int)$inv['id'],5,'0',STR_PAD_LEFT) ?></td>
-                                    <td class="fw-semibold"><?= htmlspecialchars($inv['package']) ?></td>
-                                    <td><?= htmlspecialchars($inv['booking_date']) ?></td>
-                                    <td class="fw-semibold">₱<?= number_format((float)$inv['amount'],2) ?></td>
-                                    <td class="text-success fw-semibold">₱<?= number_format((float)$inv['deposit_paid'],2) ?></td>
-                                    <td class="<?= (float)$inv['balance']>0?'text-danger fw-bold':'' ?>">₱<?= number_format((float)$inv['balance'],2) ?></td>
-                                    <td><span class="badge bg-<?= $statusBadge[$inv['status']]??'secondary' ?>"><?= ucfirst($inv['status']) ?></span></td>
-                                    <td>
+                                    <td data-label="Invoice" class="fw-bold">#<?= str_pad((int)$inv['id'],5,'0',STR_PAD_LEFT) ?></td>
+                                    <td data-label="Package" class="fw-semibold"><?= htmlspecialchars($inv['package']) ?></td>
+                                    <td data-label="Event Date"><?= htmlspecialchars($inv['booking_date']) ?></td>
+                                    <td data-label="Total" class="fw-semibold">₱<?= number_format((float)$inv['amount'],2) ?></td>
+                                    <td data-label="Paid" class="text-success fw-semibold">₱<?= number_format((float)$inv['deposit_paid'],2) ?></td>
+                                    <td data-label="Balance" class="<?= (float)$inv['balance']>0?'text-danger fw-bold':'' ?>">₱<?= number_format((float)$inv['balance'],2) ?></td>
+                                    <td data-label="Status"><span class="badge bg-<?= $statusBadge[$inv['status']]??'secondary' ?>"><?= ucfirst($inv['status']) ?></span></td>
+                                    <td data-label="Action">
                                         <a href="invoice_pdf.php?id=<?= (int)$inv['id'] ?>" target="_blank"
                                            class="btn-action" title="Print Invoice">
                                             <i class="bi bi-printer"></i>

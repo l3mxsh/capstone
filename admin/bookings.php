@@ -133,7 +133,7 @@ require_once '../includes/admin_head.php';
                 </form>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr>
                             <th>#</th><th>Client</th><th>Package</th><th>Booking Date</th><th>Event Type</th><th>Status</th><th>Actions</th>
@@ -147,8 +147,8 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($bookings as $b): ?>
                         <tr>
-                            <td class="text-muted">#<?= (int)$b['id'] ?></td>
-                            <td>
+                            <td data-label="#" class="text-muted">#<?= (int)$b['id'] ?></td>
+                            <td data-label="Client">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar-sm"><?= strtoupper(substr($b['client'],0,1)) ?></span>
                                     <div>
@@ -157,25 +157,21 @@ require_once '../includes/admin_head.php';
                                     </div>
                                 </div>
                             </td>
-                            <td><?= htmlspecialchars($b['package']) ?></td>
-                            <td><?= htmlspecialchars($b['booking_date']) ?></td>
-                            <td><?= htmlspecialchars($b['event_type'] ?? '—') ?></td>
-                            <td><span class="badge bg-<?= $statusBadge[$b['status']] ?? 'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
-                            <td>
+                            <td data-label="Package"><?= htmlspecialchars($b['package']) ?></td>
+                            <td data-label="Date"><?= htmlspecialchars($b['booking_date']) ?></td>
+                            <td data-label="Event"><?= htmlspecialchars($b['event_type'] ?? '—') ?></td>
+                            <td data-label="Status"><span class="badge bg-<?= $statusBadge[$b['status']] ?? 'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
+                            <td data-label="Actions">
                                 <div class="d-flex gap-1">
                                     <button class="btn-action" title="View Details"
                                             onclick="viewBooking(<?= htmlspecialchars(json_encode($b), ENT_QUOTES) ?>)">
                                         <i class="bi bi-eye"></i>
                                     </button>
                                     <?php if ($b['status'] === 'pending'): ?>
-                                        <form method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="approve">
-                                            <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
-                                            <button type="submit" class="btn-action success" title="Approve"
-                                                    onclick="return confirm('Approve this booking?')">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </form>
+                                        <button class="btn-action success" title="Approve"
+                                                onclick="openApproveModal(<?= (int)$b['id'] ?>)">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
                                         <button class="btn-action danger" title="Cancel"
                                                 onclick="openRejectModal(<?= (int)$b['id'] ?>)">
                                             <i class="bi bi-x-lg"></i>
@@ -203,9 +199,32 @@ require_once '../includes/admin_head.php';
     </div>
 </div>
 
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST">
+            <input type="hidden" name="action" value="approve">
+            <input type="hidden" name="id" id="approveId">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title">Approve Booking</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" style="font-size:.875rem;">Are you sure you want to approve this booking? A staff member will be automatically assigned.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- View Modal -->
 <div class="modal fade" id="viewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">Booking Details</span>
@@ -242,7 +261,7 @@ require_once '../includes/admin_head.php';
 
 <!-- Reschedule Modal -->
 <div class="modal fade" id="rescheduleModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" value="reschedule">
             <input type="hidden" name="id" id="rescheduleId">
@@ -272,7 +291,7 @@ require_once '../includes/admin_head.php';
 
 <!-- Reject Modal -->
 <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" value="reject">
             <input type="hidden" name="id" id="rejectId">
@@ -300,6 +319,10 @@ require_once '../includes/admin_head.php';
 
     const statusBadge = {pending:'warning',approved:'success',rescheduled:'info',cancelled:'danger'};
 
+    function openApproveModal(id) {
+        document.getElementById('approveId').value = id;
+        new bootstrap.Modal(document.getElementById('approveModal')).show();
+    }
     function viewBooking(b) {
         document.getElementById('vClient').textContent    = b.client       || '—';
         document.getElementById('vEmail').textContent     = b.client_email || '—';

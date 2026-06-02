@@ -83,7 +83,7 @@ require_once '../includes/client_head.php';
                 <h6>All Bookings <span class="badge bg-secondary ms-2"><?= count($bookings) ?></span></h6>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>#</th><th>Package</th><th>Booking Date</th><th>Event Type</th><th>Venue</th><th>Status</th><th>Actions</th></tr>
                     </thead>
@@ -106,13 +106,13 @@ require_once '../includes/client_head.php';
                             ]),ENT_QUOTES);
                         ?>
                         <tr>
-                            <td class="text-muted">#<?= (int)$b['id'] ?></td>
-                            <td class="fw-semibold"><?= htmlspecialchars($b['package']) ?></td>
-                            <td><?= htmlspecialchars($b['booking_date']) ?></td>
-                            <td><?= htmlspecialchars($b['event_type']??'—') ?></td>
-                            <td style="max-width:150px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars($b['venue']??'—') ?></div></td>
-                            <td><span class="badge bg-<?= $statusBadge[$b['status']]??'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
-                            <td>
+                            <td data-label="#" class="text-muted">#<?= (int)$b['id'] ?></td>
+                            <td data-label="Package" class="fw-semibold"><?= htmlspecialchars($b['package']) ?></td>
+                            <td data-label="Date"><?= htmlspecialchars($b['booking_date']) ?></td>
+                            <td data-label="Event"><?= htmlspecialchars($b['event_type']??'—') ?></td>
+                            <td data-label="Venue" style="max-width:150px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars($b['venue']??'—') ?></div></td>
+                            <td data-label="Status"><span class="badge bg-<?= $statusBadge[$b['status']]??'secondary' ?>"><?= ucfirst($b['status']) ?></span></td>
+                            <td data-label="Actions">
                                 <div class="d-flex gap-1">
                                     <button class="btn-action" title="View Details" onclick="viewDetails(<?= $bJson ?>)">
                                         <i class="bi bi-eye"></i>
@@ -136,7 +136,7 @@ require_once '../includes/client_head.php';
 
 <!-- View Details Modal -->
 <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">Booking Details</span>
@@ -193,7 +193,7 @@ require_once '../includes/client_head.php';
 
 <!-- Cancel Modal -->
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" value="cancel">
             <input type="hidden" name="booking_id" id="cancelBookingId">

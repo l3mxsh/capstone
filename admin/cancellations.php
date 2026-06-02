@@ -106,7 +106,7 @@ require_once '../includes/admin_head.php';
                 <span class="badge bg-secondary"><?= count($eligible) ?> active booking(s)</span>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>Date</th><th>Client</th><th>Package</th><th>Status</th><th>Action</th></tr>
                     </thead>
@@ -116,8 +116,8 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($eligible as $e): ?>
                         <tr>
-                            <td class="fw-semibold"><?= htmlspecialchars($e['booking_date']) ?></td>
-                            <td>
+                            <td data-label="Date" class="fw-semibold"><?= htmlspecialchars($e['booking_date']) ?></td>
+                            <td data-label="Client">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar-sm"><?= strtoupper(substr($e['client'],0,1)) ?></span>
                                     <div>
@@ -126,12 +126,12 @@ require_once '../includes/admin_head.php';
                                     </div>
                                 </div>
                             </td>
-                            <td><?= htmlspecialchars($e['package']) ?></td>
-                            <td>
+                            <td data-label="Package"><?= htmlspecialchars($e['package']) ?></td>
+                            <td data-label="Status">
                                 <?php $sc=['pending'=>'warning','approved'=>'success','rescheduled'=>'info']; ?>
                                 <span class="badge bg-<?= $sc[$e['status']]??'secondary' ?>"><?= ucfirst($e['status']) ?></span>
                             </td>
-                            <td>
+                            <td data-label="Action">
                                 <button class="btn-action danger" title="Process Cancellation"
                                         onclick="openCancelModal(<?= htmlspecialchars(json_encode($e),ENT_QUOTES) ?>)">
                                     <i class="bi bi-x-circle"></i>
@@ -152,7 +152,7 @@ require_once '../includes/admin_head.php';
                 <span class="badge bg-secondary"><?= count($logs) ?> record(s)</span>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>#</th><th>Client</th><th>Package</th><th>Booking Date</th><th>Reason</th><th>Deposit Paid</th><th>Retained</th><th>Refundable</th><th>Cancelled At</th></tr>
                     </thead>
@@ -164,18 +164,18 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($logs as $log): $refundable = max(0,(float)$log['deposit_amount']-(float)$log['deposit_retained']); ?>
                         <tr>
-                            <td class="text-muted"><?= (int)$log['id'] ?></td>
-                            <td>
+                            <td data-label="#" class="text-muted"><?= (int)$log['id'] ?></td>
+                            <td data-label="Client">
                                 <div class="fw-semibold"><?= htmlspecialchars($log['client']) ?></div>
                                 <div style="font-size:.74rem;color:#aaa;"><?= htmlspecialchars($log['client_email']) ?></div>
                             </td>
-                            <td><?= htmlspecialchars($log['package']) ?></td>
-                            <td><?= htmlspecialchars($log['booking_date']) ?></td>
-                            <td style="max-width:180px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars($log['reason']?:'—') ?></div></td>
-                            <td>₱<?= number_format((float)$log['deposit_amount'],2) ?></td>
-                            <td class="text-danger fw-semibold">₱<?= number_format((float)$log['deposit_retained'],2) ?></td>
-                            <td class="text-success fw-semibold">₱<?= number_format($refundable,2) ?></td>
-                            <td><?= date('M d, Y g:i A', strtotime($log['cancelled_at'])) ?></td>
+                            <td data-label="Package"><?= htmlspecialchars($log['package']) ?></td>
+                            <td data-label="Booking Date"><?= htmlspecialchars($log['booking_date']) ?></td>
+                            <td data-label="Reason" style="max-width:180px;"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><?= htmlspecialchars($log['reason']?:'—') ?></div></td>
+                            <td data-label="Deposit Paid">₱<?= number_format((float)$log['deposit_amount'],2) ?></td>
+                            <td data-label="Retained" class="text-danger fw-semibold">₱<?= number_format((float)$log['deposit_retained'],2) ?></td>
+                            <td data-label="Refundable" class="text-success fw-semibold">₱<?= number_format($refundable,2) ?></td>
+                            <td data-label="Cancelled At"><?= date('M d, Y g:i A', strtotime($log['cancelled_at'])) ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -188,7 +188,7 @@ require_once '../includes/admin_head.php';
 
 <!-- Process Cancellation Modal -->
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" value="process">
             <input type="hidden" name="booking_id" id="cancelBookingId">
@@ -226,8 +226,7 @@ require_once '../includes/admin_head.php';
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Back</button>
-                    <button type="submit" class="btn btn-danger btn-sm"
-                            onclick="return confirm('Confirm cancellation? This cannot be undone.')">
+                    <button type="submit" class="btn btn-danger btn-sm">
                         Confirm Cancellation
                     </button>
                 </div>

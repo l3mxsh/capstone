@@ -114,7 +114,7 @@ require_once '../includes/admin_head.php';
                 </button>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>#</th><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr>
                     </thead>
@@ -126,37 +126,32 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($staffList as $s): ?>
                         <tr>
-                            <td class="text-muted"><?= (int)$s['id'] ?></td>
-                            <td>
+                            <td data-label="#" class="text-muted"><?= (int)$s['id'] ?></td>
+                            <td data-label="Name">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar-sm"><?= strtoupper(substr($s['name'],0,1)) ?></span>
                                     <span class="fw-semibold"><?= htmlspecialchars($s['name']) ?></span>
                                 </div>
                             </td>
-                            <td><?= htmlspecialchars($s['role']??'—') ?></td>
-                            <td class="text-muted"><?= htmlspecialchars($s['email']??'—') ?></td>
-                            <td><?= htmlspecialchars($s['phone']??'—') ?></td>
-                            <td>
+                            <td data-label="Role"><?= htmlspecialchars($s['role']??'—') ?></td>
+                            <td data-label="Email" class="text-muted"><?= htmlspecialchars($s['email']??'—') ?></td>
+                            <td data-label="Phone"><?= htmlspecialchars($s['phone']??'—') ?></td>
+                            <td data-label="Status">
                                 <span class="badge <?= $s['status']==='active'?'bg-success':'bg-secondary' ?>">
                                     <?= ucfirst($s['status']) ?>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Actions">
                                 <div class="d-flex gap-1">
                                     <button class="btn-action" title="Edit"
                                             onclick="openEditModal(<?= htmlspecialchars(json_encode($s),ENT_QUOTES) ?>)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <form method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="toggle_status">
-                                        <input type="hidden" name="id" value="<?= (int)$s['id'] ?>">
-                                        <input type="hidden" name="new_status" value="<?= $s['status']==='active'?'inactive':'active' ?>">
-                                        <button type="submit" class="btn-action <?= $s['status']==='active'?'warning':'success' ?>"
-                                                title="<?= $s['status']==='active'?'Deactivate':'Activate' ?>"
-                                                onclick="return confirm('<?= $s['status']==='active'?'Deactivate':'Activate' ?> this staff?')">
-                                            <i class="bi <?= $s['status']==='active'?'bi-person-dash':'bi-person-check' ?>"></i>
-                                        </button>
-                                    </form>
+                                    <button class="btn-action <?= $s['status']==='active'?'warning':'success' ?>"
+                                            title="<?= $s['status']==='active'?'Deactivate':'Activate' ?>"
+                                            onclick="openToggleStaffModal(<?= (int)$s['id'] ?>, '<?= htmlspecialchars(addslashes($s['name'])) ?>', '<?= $s['status']==='active'?'inactive':'active' ?>')">
+                                        <i class="bi <?= $s['status']==='active'?'bi-person-dash':'bi-person-check' ?>"></i>
+                                    </button>
                                     <a href="staff.php?view_staff=<?= (int)$s['id'] ?>" class="btn-action" title="View Schedule">
                                         <i class="bi bi-calendar3"></i>
                                     </a>
@@ -178,7 +173,7 @@ require_once '../includes/admin_head.php';
                 <a href="staff.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x me-1"></i>Close</a>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>Date</th><th>Client</th><th>Event Type</th><th>Venue</th></tr>
                     </thead>
@@ -188,10 +183,10 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($scheduleRows as $sr): ?>
                         <tr>
-                            <td class="fw-semibold"><?= htmlspecialchars($sr['booking_date']) ?></td>
-                            <td><?= htmlspecialchars($sr['client']) ?></td>
-                            <td><?= htmlspecialchars($sr['event_type']??'—') ?></td>
-                            <td><?= htmlspecialchars($sr['venue']??'—') ?></td>
+                            <td data-label="Date" class="fw-semibold"><?= htmlspecialchars($sr['booking_date']) ?></td>
+                            <td data-label="Client"><?= htmlspecialchars($sr['client']) ?></td>
+                            <td data-label="Event"><?= htmlspecialchars($sr['event_type']??'—') ?></td>
+                            <td data-label="Venue"><?= htmlspecialchars($sr['venue']??'—') ?></td>
                         </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -211,7 +206,7 @@ require_once '../includes/admin_head.php';
                 <span class="badge bg-secondary"><?= count($assignableBookings) ?> booking(s)</span>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>Date</th><th>Client</th><th>Event / Venue</th><th>Assigned Staff</th><th>Reassign</th></tr>
                     </thead>
@@ -224,18 +219,18 @@ require_once '../includes/admin_head.php';
                             foreach ($staffList as $sm) { if ($sm['id'] == $ab['assigned_staff_id']) { $assignedName = $sm['name']; break; } }
                         ?>
                         <tr>
-                            <td class="fw-semibold"><?= htmlspecialchars($ab['booking_date']) ?></td>
-                            <td><?= htmlspecialchars($ab['client']) ?></td>
-                            <td>
+                            <td data-label="Date" class="fw-semibold"><?= htmlspecialchars($ab['booking_date']) ?></td>
+                            <td data-label="Client"><?= htmlspecialchars($ab['client']) ?></td>
+                            <td data-label="Event">
                                 <div><?= htmlspecialchars($ab['event_type']??'—') ?></div>
                                 <div style="font-size:.74rem;color:#aaa;"><?= htmlspecialchars($ab['venue']??'') ?></div>
                             </td>
-                            <td>
+                            <td data-label="Assigned">
                                 <span class="badge <?= $ab['assigned_staff_id']?'bg-success':'bg-secondary' ?>">
                                     <?= htmlspecialchars($assignedName) ?>
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Reassign">
                                 <form method="POST" class="d-flex gap-2 align-items-center">
                                     <input type="hidden" name="action" value="assign">
                                     <input type="hidden" name="booking_id" value="<?= (int)$ab['id'] ?>">
@@ -261,9 +256,33 @@ require_once '../includes/admin_head.php';
     </div>
 </div>
 
+<!-- Toggle Staff Status Modal -->
+<div class="modal fade" id="toggleStaffModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST">
+            <input type="hidden" name="action" value="toggle_status">
+            <input type="hidden" name="id" id="tsId">
+            <input type="hidden" name="new_status" id="tsNewStatus">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title" id="tsTitle">Update Staff Status</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" style="font-size:.875rem;"><span id="tsVerb">Deactivate</span> staff member <strong id="tsName"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark btn-sm">Confirm</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Add/Edit Staff Modal -->
 <div class="modal fade" id="staffModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" id="formAction" value="add">
             <input type="hidden" name="id" id="formId">
@@ -304,6 +323,15 @@ require_once '../includes/admin_head.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('show'));
+    function openToggleStaffModal(id, name, newStatus) {
+        document.getElementById('tsId').value = id;
+        document.getElementById('tsNewStatus').value = newStatus;
+        document.getElementById('tsName').textContent = name;
+        const verb = newStatus === 'inactive' ? 'Deactivate' : 'Activate';
+        document.getElementById('tsVerb').textContent = verb;
+        document.getElementById('tsTitle').textContent = verb + ' Staff';
+        new bootstrap.Modal(document.getElementById('toggleStaffModal')).show();
+    }
     function openAddModal() {
         document.getElementById('staffModalLabel').textContent = 'Add Staff';
         document.getElementById('formAction').value = 'add';

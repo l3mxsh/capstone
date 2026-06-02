@@ -104,7 +104,7 @@ require_once '../includes/admin_head.php';
                 </button>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>#</th><th>Name</th><th>Email</th><th>Bookings</th><th>Status</th><th>Registered</th><th>Actions</th></tr>
                     </thead>
@@ -116,45 +116,36 @@ require_once '../includes/admin_head.php';
                     <?php else: ?>
                         <?php foreach ($clients as $c): ?>
                         <tr>
-                            <td class="text-muted"><?= (int)$c['id'] ?></td>
-                            <td>
+                            <td data-label="#" class="text-muted"><?= (int)$c['id'] ?></td>
+                            <td data-label="Name">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar-sm"><?= strtoupper(substr($c['name'],0,1)) ?></span>
                                     <span class="fw-semibold"><?= htmlspecialchars($c['name']) ?></span>
                                 </div>
                             </td>
-                            <td class="text-muted"><?= htmlspecialchars($c['email']) ?></td>
-                            <td><span class="badge bg-secondary"><?= (int)$c['booking_count'] ?></span></td>
-                            <td>
+                            <td data-label="Email" class="text-muted"><?= htmlspecialchars($c['email']) ?></td>
+                            <td data-label="Bookings"><span class="badge bg-secondary"><?= (int)$c['booking_count'] ?></span></td>
+                            <td data-label="Status">
                                 <span class="badge <?= $c['status']==='active'?'bg-success':'bg-danger' ?>">
                                     <?= ucfirst($c['status']) ?>
                                 </span>
                             </td>
-                            <td><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
-                            <td>
+                            <td data-label="Registered"><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
+                            <td data-label="Actions">
                                 <div class="d-flex gap-1">
                                     <button class="btn-action" title="Edit"
                                             onclick="openEditModal(<?= htmlspecialchars(json_encode($c),ENT_QUOTES) ?>)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <form method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="reset_password">
-                                        <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
-                                        <button type="submit" class="btn-action warning" title="Reset Password"
-                                                onclick="return confirm('Reset password for <?= htmlspecialchars(addslashes($c['name'])) ?>?')">
-                                            <i class="bi bi-key"></i>
-                                        </button>
-                                    </form>
-                                    <form method="POST" class="d-inline">
-                                        <input type="hidden" name="action" value="toggle_status">
-                                        <input type="hidden" name="id" value="<?= (int)$c['id'] ?>">
-                                        <input type="hidden" name="new_status" value="<?= $c['status']==='active'?'inactive':'active' ?>">
-                                        <button type="submit" class="btn-action <?= $c['status']==='active'?'danger':'success' ?>"
-                                                title="<?= $c['status']==='active'?'Deactivate':'Reactivate' ?>"
-                                                onclick="return confirm('<?= $c['status']==='active'?'Deactivate':'Reactivate' ?> this client?')">
-                                            <i class="bi <?= $c['status']==='active'?'bi-person-dash':'bi-person-check' ?>"></i>
-                                        </button>
-                                    </form>
+                                    <button class="btn-action warning" title="Reset Password"
+                                            onclick="openResetPwdModal(<?= (int)$c['id'] ?>, '<?= htmlspecialchars(addslashes($c['name'])) ?>')">
+                                        <i class="bi bi-key"></i>
+                                    </button>
+                                    <button class="btn-action <?= $c['status']==='active'?'danger':'success' ?>"
+                                            title="<?= $c['status']==='active'?'Deactivate':'Reactivate' ?>"
+                                            onclick="openToggleClientModal(<?= (int)$c['id'] ?>, '<?= htmlspecialchars(addslashes($c['name'])) ?>', '<?= $c['status']==='active'?'inactive':'active' ?>')">
+                                        <i class="bi <?= $c['status']==='active'?'bi-person-dash':'bi-person-check' ?>"></i>
+                                    </button>
                                     <a href="bookings.php?client_id=<?= (int)$c['id'] ?>" class="btn-action" title="View Bookings">
                                         <i class="bi bi-calendar-week"></i>
                                     </a>
@@ -170,9 +161,56 @@ require_once '../includes/admin_head.php';
     </div>
 </div>
 
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPwdModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST">
+            <input type="hidden" name="action" value="reset_password">
+            <input type="hidden" name="id" id="rpId">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title">Reset Password</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" style="font-size:.875rem;">Reset password for <strong id="rpName"></strong>? A new password will be generated and emailed to them.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning btn-sm">Reset Password</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toggle Client Status Modal -->
+<div class="modal fade" id="toggleClientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST">
+            <input type="hidden" name="action" value="toggle_status">
+            <input type="hidden" name="id" id="tcId">
+            <input type="hidden" name="new_status" id="tcNewStatus">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title" id="tcTitle">Update Client Status</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" style="font-size:.875rem;"><span id="tcVerb">Deactivate</span> client <strong id="tcName"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark btn-sm">Confirm</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Create/Edit Modal -->
 <div class="modal fade" id="clientModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" id="formAction" value="create">
             <input type="hidden" name="id" id="formId">
@@ -214,6 +252,20 @@ require_once '../includes/admin_head.php';
 <script>
     document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('show'));
 
+    function openResetPwdModal(id, name) {
+        document.getElementById('rpId').value = id;
+        document.getElementById('rpName').textContent = name;
+        new bootstrap.Modal(document.getElementById('resetPwdModal')).show();
+    }
+    function openToggleClientModal(id, name, newStatus) {
+        document.getElementById('tcId').value = id;
+        document.getElementById('tcNewStatus').value = newStatus;
+        document.getElementById('tcName').textContent = name;
+        const verb = newStatus === 'inactive' ? 'Deactivate' : 'Reactivate';
+        document.getElementById('tcVerb').textContent = verb;
+        document.getElementById('tcTitle').textContent = verb + ' Client';
+        new bootstrap.Modal(document.getElementById('toggleClientModal')).show();
+    }
     function openCreateModal() {
         document.getElementById('modalTitle').textContent = 'Add Client';
         document.getElementById('formAction').value = 'create';

@@ -115,7 +115,7 @@ require_once '../includes/admin_head.php';
                 <h6>Post-Production Projects <span class="badge bg-secondary ms-2"><?= count($projects) ?></span></h6>
             </div>
             <div class="table-responsive">
-                <table class="table modern-table mb-0">
+                <table class="table modern-table mobile-cards mb-0">
                     <thead>
                         <tr><th>Client</th><th>Package</th><th>Event Date</th><th>Photo</th><th>Video</th><th>Other</th><th>Progress</th><th>Deadline</th><th>Status</th><th>Actions</th></tr>
                     </thead>
@@ -132,7 +132,7 @@ require_once '../includes/admin_head.php';
                             $isComplete = ($proj['photo_status']==='completed' && $proj['video_status']==='completed' && $proj['other_status']==='completed');
                         ?>
                         <tr>
-                            <td>
+                            <td data-label="Client">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar-sm"><?= strtoupper(substr($proj['client'],0,1)) ?></span>
                                     <div>
@@ -141,12 +141,12 @@ require_once '../includes/admin_head.php';
                                     </div>
                                 </div>
                             </td>
-                            <td><?= htmlspecialchars($proj['package']) ?></td>
-                            <td><?= htmlspecialchars($proj['booking_date']) ?></td>
-                            <?php foreach (['photo_status','video_status','other_status'] as $col): ?>
-                            <td><span class="badge bg-<?= $statusBadge[$proj[$col]]??'secondary' ?>" style="font-size:.68rem;"><?= $statusOpts[$proj[$col]]??$proj[$col] ?></span></td>
+                            <td data-label="Package"><?= htmlspecialchars($proj['package']) ?></td>
+                            <td data-label="Event Date"><?= htmlspecialchars($proj['booking_date']) ?></td>
+                            <?php foreach (['photo_status'=>'Photo','video_status'=>'Video','other_status'=>'Other'] as $col=>$lbl): ?>
+                            <td data-label="<?= $lbl ?>"><span class="badge bg-<?= $statusBadge[$proj[$col]]??'secondary' ?>" style="font-size:.68rem;"><?= $statusOpts[$proj[$col]]??$proj[$col] ?></span></td>
                             <?php endforeach; ?>
-                            <td style="min-width:100px;">
+                            <td data-label="Progress" style="min-width:100px;">
                                 <div class="d-flex align-items-center gap-1">
                                     <div class="progress flex-grow-1" style="height:6px;">
                                         <div class="progress-bar <?= $barClass ?>" role="progressbar" style="width:<?= $pct ?>%" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100"></div>
@@ -154,29 +154,25 @@ require_once '../includes/admin_head.php';
                                     <span style="font-size:.72rem;width:28px;text-align:right;font-weight:600;"><?= $pct ?>%</span>
                                 </div>
                             </td>
-                            <td><?= $proj['deadline'] ? htmlspecialchars($proj['deadline']) : '—' ?></td>
-                            <td>
+                            <td data-label="Deadline"><?= $proj['deadline'] ? htmlspecialchars($proj['deadline']) : '—' ?></td>
+                            <td data-label="Status">
                                 <?php if ($isComplete): ?>
                                     <span class="badge bg-success">Completed</span>
                                 <?php else: ?>
                                     <span class="badge bg-<?= $dlBadge[$dl] ?>"><?= $dlLabel[$dl] ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td data-label="Actions">
                                 <div class="d-flex gap-1">
                                     <button class="btn-action" title="Update"
                                             onclick="openUpdateModal(<?= htmlspecialchars(json_encode($proj),ENT_QUOTES) ?>)">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <?php if (!$isComplete): ?>
-                                        <form method="POST" class="d-inline">
-                                            <input type="hidden" name="action" value="complete">
-                                            <input type="hidden" name="id" value="<?= (int)$proj['id'] ?>">
-                                            <button type="submit" class="btn-action success" title="Mark Complete"
-                                                    onclick="return confirm('Mark as completed and notify client?')">
-                                                <i class="bi bi-check2-all"></i>
-                                            </button>
-                                        </form>
+                                        <button class="btn-action success" title="Mark Complete"
+                                                onclick="openCompleteModal(<?= (int)$proj['id'] ?>, '<?= htmlspecialchars(addslashes($proj['client'])) ?>')">
+                                            <i class="bi bi-check2-all"></i>
+                                        </button>
                                     <?php endif; ?>
                                 </div>
                             </td>
@@ -190,9 +186,32 @@ require_once '../includes/admin_head.php';
     </div>
 </div>
 
+<!-- Complete Modal -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST">
+            <input type="hidden" name="action" value="complete">
+            <input type="hidden" name="id" id="completeId">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title">Mark as Completed</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" style="font-size:.875rem;">Mark project for <strong id="completeName"></strong> as fully completed? The client will be notified by email.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Update Modal -->
 <div class="modal fade" id="updateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" value="update">
             <input type="hidden" name="id" id="uId">
@@ -249,7 +268,7 @@ require_once '../includes/admin_head.php';
 <!-- Create Modal -->
 <?php if (!empty($unlinked)): ?>
 <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <form method="POST">
             <input type="hidden" name="action" value="create">
             <div class="modal-content">
@@ -279,6 +298,11 @@ require_once '../includes/admin_head.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('show'));
+    function openCompleteModal(id, name) {
+        document.getElementById('completeId').value = id;
+        document.getElementById('completeName').textContent = name;
+        new bootstrap.Modal(document.getElementById('completeModal')).show();
+    }
     const scoreMap = {not_started:0,in_progress:1,completed:2};
     function syncProgress() {
         const score = scoreMap[document.getElementById('u_photo_status').value]
