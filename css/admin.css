@@ -454,21 +454,8 @@ body {
 .modal {
   padding-left: 0 !important;
 }
-@media (min-width: 992px) {
-  .modal {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-dialog {
-    margin: 0;
-  }
-}
-
-.modal-dialog-centered {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+body.modal-open {
+  padding-right: 0 !important;
 }
 
 .info-box {

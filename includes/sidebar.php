@@ -7,6 +7,7 @@ $navItems = [
     'staff'           => ['label' => 'Staff',            'icon' => 'bi-people',            'href' => 'staff.php'],
     'cancellations'   => ['label' => 'Cancellations',   'icon' => 'bi-x-circle',          'href' => 'cancellations.php'],
     'post_production' => ['label' => 'Post-Production', 'icon' => 'bi-film',              'href' => 'post_production.php'],
+    'invoices'        => ['label' => 'Invoices',         'icon' => 'bi-receipt',           'href' => 'invoices.php'],
     'clients'         => ['label' => 'Clients',          'icon' => 'bi-person-lines-fill', 'href' => 'clients.php'],
     'reports'         => ['label' => 'Reports',          'icon' => 'bi-bar-chart-line',    'href' => 'reports.php'],
 ];
