@@ -4,121 +4,82 @@ require_once '../config/db.php';
 
 $clientId = (int)$_SESSION['user_id'];
 
-// ── Latest booking ─────────────────────────────────────────────
-$stmtBooking = $pdo->prepare("
-    SELECT b.*, p.name AS package, p.price
-    FROM bookings b
-    JOIN packages p ON b.package_id = p.id
-    WHERE b.client_id = ?
-    ORDER BY b.created_at DESC LIMIT 1
-");
-$stmtBooking->execute([$clientId]);
-$latestBooking = $stmtBooking->fetch();
+$stmtBooking = $pdo->prepare("SELECT b.*, p.name AS package, p.price FROM bookings b JOIN packages p ON b.package_id=p.id WHERE b.client_id=? ORDER BY b.created_at DESC LIMIT 1");
+$stmtBooking->execute([$clientId]); $latestBooking = $stmtBooking->fetch();
 
-// ── Post-production for latest approved booking ────────────────
-$stmtPP = $pdo->prepare("
-    SELECT pp.photo_status, pp.video_status, pp.other_status,
-           pp.progress_percent, pp.deadline_status, pp.deadline,
-           pp.notes, pp.drive_link, b.booking_date, p.name AS package
-    FROM post_production pp
-    JOIN bookings b  ON pp.booking_id = b.id
-    JOIN packages p  ON b.package_id  = p.id
-    WHERE b.client_id = ? AND b.status = 'approved'
-    ORDER BY b.booking_date DESC LIMIT 1
-");
-$stmtPP->execute([$clientId]);
-$postProd = $stmtPP->fetch();
+$stmtPP = $pdo->prepare("SELECT pp.photo_status,pp.video_status,pp.other_status,pp.progress_percent,pp.deadline_status,pp.deadline,pp.notes,pp.drive_link,b.booking_date,p.name AS package FROM post_production pp JOIN bookings b ON pp.booking_id=b.id JOIN packages p ON b.package_id=p.id WHERE b.client_id=? AND b.status='approved' ORDER BY b.booking_date DESC LIMIT 1");
+$stmtPP->execute([$clientId]); $postProd = $stmtPP->fetch();
 
-// ── Booking counts ─────────────────────────────────────────────
-$stmtCounts = $pdo->prepare("
-    SELECT
-        COUNT(*) AS total,
-        SUM(status = 'pending')  AS pending,
-        SUM(status = 'approved') AS approved,
-        SUM(status = 'cancelled') AS cancelled
-    FROM bookings WHERE client_id = ?
-");
-$stmtCounts->execute([$clientId]);
-$counts = $stmtCounts->fetch();
+$stmtCounts = $pdo->prepare("SELECT COUNT(*) AS total, SUM(status='pending') AS pending, SUM(status='approved') AS approved, SUM(status='cancelled') AS cancelled FROM bookings WHERE client_id=?");
+$stmtCounts->execute([$clientId]); $counts = $stmtCounts->fetch();
 
-// ── Helpers ────────────────────────────────────────────────────
-$statusColors  = ['pending'=>'warning','approved'=>'success','rescheduled'=>'info','cancelled'=>'danger'];
+// Latest invoice
+$stmtInv = $pdo->prepare("SELECT i.*, p.name AS package, b.booking_date FROM invoices i JOIN bookings b ON i.booking_id=b.id JOIN packages p ON b.package_id=p.id WHERE i.client_id=? ORDER BY i.issued_date DESC LIMIT 1");
+$stmtInv->execute([$clientId]); $latestInvoice = $stmtInv->fetch();
+
+$statusBadge   = ['pending'=>'warning','approved'=>'success','rescheduled'=>'info','cancelled'=>'danger'];
 $ppStatusLabel = ['not_started'=>'Not Started','in_progress'=>'In Progress','completed'=>'Completed'];
 $ppStatusColor = ['not_started'=>'secondary','in_progress'=>'primary','completed'=>'success'];
 $dlBadge       = ['early'=>'success','near'=>'warning','late'=>'danger'];
 $dlLabel       = ['early'=>'On Track','near'=>'Due Soon','late'=>'Overdue'];
+$invBadge      = ['unpaid'=>'danger','partial'=>'warning','paid'=>'success'];
 
 $initials = strtoupper(substr($_SESSION['name'], 0, 1));
-
-$pageTitle       = 'Dashboard — Client Portal';
+$pageTitle = 'Dashboard — Client Portal';
 $activeClientPage = 'dashboard';
-
 require_once '../includes/client_head.php';
 ?>
 </head>
 <body>
-
 <?php require_once '../includes/client_sidebar.php'; ?>
 
 <div id="client-main">
-
-    <!-- Topbar -->
     <div id="client-topbar">
-        <span class="page-label">My Portal</span>
-        <div class="user-pill">
-            <div class="avatar"><?= htmlspecialchars($initials) ?></div>
-            <span><?= htmlspecialchars($_SESSION['name']) ?></span>
-            <a href="../logout.php" class="btn btn-sm btn-outline-secondary py-0 px-2 ms-2"
-               style="font-size:.78rem;">
-                <i class="bi bi-box-arrow-right"></i> Logout
-            </a>
+        <div class="d-flex align-items-center gap-3">
+            <button class="topbar-btn d-lg-none border-0" id="sidebarToggle"><i class="bi bi-list fs-5"></i></button>
+            <div>
+                <div class="topbar-title">My Portal</div>
+                <div class="topbar-sub"><?= date('l, F j, Y') ?></div>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="d-none d-sm-inline" style="font-size:.83rem;color:#888;"><?= htmlspecialchars($_SESSION['name']) ?></span>
+            <div class="topbar-avatar"><?= htmlspecialchars($initials) ?></div>
+            <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
         </div>
     </div>
 
-    <!-- Content -->
-    <div class="p-4">
+    <div class="p-3 p-md-4">
 
-        <!-- ── Welcome Banner ─────────────────────────────── -->
-        <div class="welcome-banner mb-4">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-                <div>
-                    <h4 class="mb-1 fw-bold">
-                        Welcome back, <span class="gold"><?= htmlspecialchars($_SESSION['name']) ?>!</span>
-                    </h4>
-                    <p class="mb-0 text-white-50" style="font-size:.9rem;">
-                        Manage your bookings and track your post-production progress here.
-                    </p>
-                </div>
-                <a href="bookings.php" class="btn btn-sm fw-semibold"
-                   style="background:var(--gold);color:#1a1a2e;border:none;">
-                    <i class="bi bi-plus-lg"></i> Book a Service
-                </a>
+        <!-- Welcome Banner -->
+        <div class="welcome-banner mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h5 class="fw-bold mb-1">Welcome back, <?= htmlspecialchars($_SESSION['name']) ?> 👋</h5>
+                <p class="mb-0 opacity-50" style="font-size:.875rem;">Manage your bookings and track production progress.</p>
             </div>
+            <a href="booking_create.php" class="btn btn-sm fw-semibold px-4"
+               style="background:#fff;color:#111;border:none;border-radius:8px;">
+                <i class="bi bi-plus-lg me-1"></i> Book a Service
+            </a>
         </div>
 
-        <!-- ── Booking Count Cards ────────────────────────── -->
+        <!-- Stat Cards -->
         <div class="row g-3 mb-4">
             <?php
-            $statCards = [
-                ['label'=>'Total Bookings',  'value'=>$counts['total'],     'icon'=>'bi-calendar2',       'bg'=>'#fff3cd','ic'=>'var(--gold)'],
-                ['label'=>'Pending',         'value'=>$counts['pending'],   'icon'=>'bi-hourglass-split', 'bg'=>'#fff3e0','ic'=>'#fd7e14'],
-                ['label'=>'Approved',        'value'=>$counts['approved'],  'icon'=>'bi-check-circle',    'bg'=>'#e8f5e9','ic'=>'#198754'],
-                ['label'=>'Cancelled',       'value'=>$counts['cancelled'], 'icon'=>'bi-x-circle',        'bg'=>'#fdecea','ic'=>'#dc3545'],
+            $cards = [
+                ['label'=>'Total Bookings','value'=>$counts['total'],     'icon'=>'bi-calendar2'],
+                ['label'=>'Pending',       'value'=>$counts['pending'],   'icon'=>'bi-hourglass-split'],
+                ['label'=>'Approved',      'value'=>$counts['approved'],  'icon'=>'bi-check-circle'],
+                ['label'=>'Cancelled',     'value'=>$counts['cancelled'], 'icon'=>'bi-x-circle'],
             ];
-            foreach ($statCards as $sc):
+            foreach ($cards as $c):
             ?>
             <div class="col-6 col-xl-3">
-                <div class="portal-card p-3 d-flex align-items-center gap-3">
-                    <div style="width:44px;height:44px;border-radius:10px;background:<?= $sc['bg'] ?>;
-                                display:flex;align-items:center;justify-content:center;
-                                font-size:1.3rem;flex-shrink:0;">
-                        <i class="bi <?= $sc['icon'] ?>" style="color:<?= $sc['ic'] ?>;"></i>
-                    </div>
+                <div class="stat-card">
+                    <div class="icon-wrap"><i class="bi <?= $c['icon'] ?>"></i></div>
                     <div>
-                        <div style="font-size:1.6rem;font-weight:700;line-height:1;">
-                            <?= (int)$sc['value'] ?>
-                        </div>
-                        <div style="font-size:.75rem;color:#6c757d;"><?= $sc['label'] ?></div>
+                        <div class="count"><?= (int)$c['value'] ?></div>
+                        <div class="label"><?= $c['label'] ?></div>
                     </div>
                 </div>
             </div>
@@ -126,219 +87,201 @@ require_once '../includes/client_head.php';
         </div>
 
         <div class="row g-4">
-
-            <!-- ── Left col ───────────────────────────────── -->
+            <!-- Left col -->
             <div class="col-lg-7">
 
-                <!-- Latest Booking Card -->
-                <div class="portal-card p-4 mb-4">
-                    <div class="section-title">Latest Booking</div>
+                <!-- Latest Booking -->
+                <div class="dash-card mb-4">
+                    <div class="dash-card-header">
+                        <h6>Latest Booking</h6>
+                        <a href="bookings.php" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">All Bookings</a>
+                    </div>
+                    <div class="dash-card-body">
                     <?php if (!$latestBooking): ?>
-                        <p class="text-muted small mb-0">You have no bookings yet.</p>
+                        <div class="text-center py-3">
+                            <i class="bi bi-calendar-x fs-2 opacity-25 d-block mb-2"></i>
+                            <p class="mb-0 small text-muted">No bookings yet. <a href="booking_create.php" class="text-dark fw-semibold">Book now →</a></p>
+                        </div>
                     <?php else: ?>
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
                             <div>
-                                <h6 class="mb-0 fw-bold"><?= htmlspecialchars($latestBooking['package']) ?></h6>
-                                <span class="text-muted" style="font-size:.82rem;">
-                                    <?= htmlspecialchars($latestBooking['event_type'] ?? 'Event') ?>
-                                </span>
+                                <div class="fw-bold"><?= htmlspecialchars($latestBooking['package']) ?></div>
+                                <div style="font-size:.78rem;color:#888;"><?= htmlspecialchars($latestBooking['event_type']??'Event') ?></div>
                             </div>
-                            <span class="badge bg-<?= $statusColors[$latestBooking['status']] ?? 'secondary' ?> status-badge-lg">
-                                <?= ucfirst($latestBooking['status']) ?>
-                            </span>
+                            <span class="badge bg-<?= $statusBadge[$latestBooking['status']]??'secondary' ?>"><?= ucfirst($latestBooking['status']) ?></span>
                         </div>
-                        <div class="row g-2" style="font-size:.85rem;">
-                            <div class="col-6">
-                                <div class="text-muted" style="font-size:.72rem;">BOOKING DATE</div>
-                                <div class="fw-semibold"><?= htmlspecialchars($latestBooking['booking_date']) ?></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-muted" style="font-size:.72rem;">VENUE</div>
-                                <div class="fw-semibold"><?= htmlspecialchars($latestBooking['venue'] ?? '—') ?></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-muted" style="font-size:.72rem;">PACKAGE PRICE</div>
-                                <div class="fw-semibold">₱<?= number_format((float)$latestBooking['price'], 2) ?></div>
-                            </div>
-                            <div class="col-6">
-                                <div class="text-muted" style="font-size:.72rem;">BOOKED ON</div>
-                                <div class="fw-semibold">
-                                    <?= date('M d, Y', strtotime($latestBooking['created_at'])) ?>
-                                </div>
-                            </div>
-                            <?php if ($latestBooking['notes']): ?>
-                            <div class="col-12">
-                                <div class="text-muted" style="font-size:.72rem;">NOTES</div>
-                                <div><?= htmlspecialchars($latestBooking['notes']) ?></div>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="mt-3">
-                            <a href="bookings.php" class="btn btn-sm btn-outline-secondary py-0 px-3"
-                               style="font-size:.8rem;">
-                                View All Bookings <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Post-Production Status -->
-                <div class="portal-card p-4">
-                    <div class="section-title">Post-Production Status</div>
-                    <?php if (!$postProd): ?>
-                        <p class="text-muted small mb-0">
-                            No post-production project yet. This appears once your booking is approved.
-                        </p>
-                    <?php else:
-                        $pct      = min(100, max(0, (int)$postProd['progress_percent']));
-                        $barColor = $pct < 40 ? 'danger' : ($pct < 75 ? 'warning' : 'success');
-                        $dl       = $postProd['deadline_status'] ?? 'early';
-                    ?>
-                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                            <div style="font-size:.875rem;">
-                                <span class="fw-semibold"><?= htmlspecialchars($postProd['package']) ?></span>
-                                <span class="text-muted"> — <?= htmlspecialchars($postProd['booking_date']) ?></span>
-                            </div>
-                            <span class="badge bg-<?= $dlBadge[$dl] ?> status-badge-lg">
-                                <?= $dlLabel[$dl] ?>
-                                <?= $postProd['deadline'] ? '· ' . htmlspecialchars($postProd['deadline']) : '' ?>
-                            </span>
-                        </div>
-
-                        <!-- Progress bar -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1" style="font-size:.8rem;">
-                                <span class="text-muted">Overall Progress</span>
-                                <span class="fw-semibold"><?= $pct ?>%</span>
-                            </div>
-                            <div class="progress progress-lg">
-                                <div class="progress-bar bg-<?= $barColor ?>"
-                                     style="width:<?= $pct ?>%"
-                                     role="progressbar"
-                                     aria-valuenow="<?= $pct ?>"
-                                     aria-valuemin="0" aria-valuemax="100">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Per-deliverable status -->
-                        <div class="row g-2 mb-3">
+                        <div class="row g-2">
                             <?php
-                            $deliverables = [
-                                'photo_status' => ['label'=>'Photography','icon'=>'bi-camera'],
-                                'video_status' => ['label'=>'Videography', 'icon'=>'bi-camera-video'],
-                                'other_status' => ['label'=>'Other',       'icon'=>'bi-box'],
+                            $fields = [
+                                ['Booking Date', $latestBooking['booking_date']],
+                                ['Venue', $latestBooking['venue']??'—'],
+                                ['Package Price', '₱'.number_format((float)$latestBooking['price'],2)],
+                                ['Booked On', date('M d, Y', strtotime($latestBooking['created_at']))],
                             ];
-                            foreach ($deliverables as $key => $info):
-                                $val = $postProd[$key] ?? 'not_started';
+                            foreach ($fields as [$lbl,$val]):
                             ?>
-                            <div class="col-4">
-                                <div class="text-center p-2 rounded" style="background:#f8f9fa;">
-                                    <i class="bi <?= $info['icon'] ?> mb-1"
-                                       style="font-size:1.1rem;color:var(--gold);display:block;"></i>
-                                    <div style="font-size:.7rem;color:#6c757d;"><?= $info['label'] ?></div>
-                                    <span class="badge bg-<?= $ppStatusColor[$val] ?> mt-1"
-                                          style="font-size:.65rem;">
-                                        <?= $ppStatusLabel[$val] ?>
-                                    </span>
+                            <div class="col-6">
+                                <div class="info-box">
+                                    <div class="info-label"><?= $lbl ?></div>
+                                    <div class="fw-semibold mt-1"><?= htmlspecialchars($val) ?></div>
                                 </div>
                             </div>
                             <?php endforeach; ?>
                         </div>
+                    <?php endif; ?>
+                    </div>
+                </div>
 
+                <!-- Post-Production -->
+                <div class="dash-card mb-4">
+                    <div class="dash-card-header">
+                        <h6>Post-Production Status</h6>
+                        <a href="post_production.php" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">Details</a>
+                    </div>
+                    <div class="dash-card-body">
+                    <?php if (!$postProd): ?>
+                        <div class="text-center py-3">
+                            <i class="bi bi-film fs-2 opacity-25 d-block mb-2"></i>
+                            <p class="mb-0 small text-muted">Appears once your booking is approved.</p>
+                        </div>
+                    <?php else:
+                        $pct = min(100, max(0,(int)$postProd['progress_percent']));
+                        $barClass = $pct < 40 ? 'bg-danger' : ($pct < 75 ? 'bg-warning' : 'bg-success');
+                        $dl = $postProd['deadline_status']??'early';
+                    ?>
+                        <div class="d-flex justify-content-between mb-3 flex-wrap gap-2">
+                            <span class="fw-semibold"><?= htmlspecialchars($postProd['package']) ?></span>
+                            <span class="badge bg-<?= $dlBadge[$dl] ?>"><?= $dlLabel[$dl] ?><?= $postProd['deadline']?' · '.htmlspecialchars($postProd['deadline']):'' ?></span>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;">
+                                <span style="color:#888;">Overall Progress</span>
+                                <span class="fw-bold"><?= $pct ?>%</span>
+                            </div>
+                            <div class="progress" style="height:8px;">
+                                <div class="progress-bar <?= $barClass ?>" role="progressbar" style="width:<?= $pct ?>%" aria-valuenow="<?= $pct ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <?php foreach (['photo_status'=>['Photography','bi-camera'],'video_status'=>['Videography','bi-camera-video'],'other_status'=>['Other','bi-box']] as $key=>[$lbl,$icon]): $val=$postProd[$key]??'not_started'; ?>
+                            <div class="col-4">
+                                <div class="info-box text-center">
+                                    <i class="bi <?= $icon ?> d-block mb-1" style="font-size:1.1rem;"></i>
+                                    <div style="font-size:.68rem;color:#aaa;"><?= $lbl ?></div>
+                                    <span class="badge bg-<?= $ppStatusColor[$val] ?> mt-1" style="font-size:.62rem;"><?= $ppStatusLabel[$val] ?></span>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
                         <?php if ($postProd['drive_link']): ?>
-                        <a href="<?= htmlspecialchars($postProd['drive_link']) ?>"
-                           target="_blank" rel="noopener"
-                           class="btn btn-sm fw-semibold w-100"
-                           style="background:var(--gold);color:#fff;border:none;font-size:.82rem;">
-                            <i class="bi bi-cloud-download"></i> Download My Files
+                        <a href="<?= htmlspecialchars($postProd['drive_link']) ?>" target="_blank" rel="noopener"
+                           class="btn btn-dark btn-sm fw-semibold w-100" style="border-radius:8px;">
+                            <i class="bi bi-cloud-download me-1"></i> Download My Files
                         </a>
                         <?php endif; ?>
+                    <?php endif; ?>
+                    </div>
+                </div>
 
-                        <?php if ($postProd['notes']): ?>
-                        <div class="mt-3 p-2 rounded" style="background:#f8f9fa;font-size:.82rem;">
-                            <span class="text-muted">Note from studio: </span>
-                            <?= htmlspecialchars($postProd['notes']) ?>
+                <!-- Latest Invoice / Payment -->
+                <?php if ($latestInvoice): ?>
+                <div class="dash-card">
+                    <div class="dash-card-header">
+                        <h6>Latest Invoice</h6>
+                        <a href="invoices.php" class="btn btn-sm btn-outline-secondary" style="font-size:.76rem;">All Invoices</a>
+                    </div>
+                    <div class="dash-card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                            <div>
+                                <div class="fw-bold"><?= htmlspecialchars($latestInvoice['package']) ?></div>
+                                <div style="font-size:.78rem;color:#888;"><?= htmlspecialchars($latestInvoice['booking_date']) ?></div>
+                            </div>
+                            <span class="badge bg-<?= $invBadge[$latestInvoice['status']]??'secondary' ?>"><?= ucfirst($latestInvoice['status']) ?></span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-4"><div class="info-box text-center"><div class="info-label">Total</div><div class="fw-bold mt-1">₱<?= number_format((float)$latestInvoice['amount'],2) ?></div></div></div>
+                            <div class="col-4"><div class="info-box text-center"><div class="info-label">Paid</div><div class="fw-bold mt-1 text-success">₱<?= number_format((float)$latestInvoice['deposit_paid'],2) ?></div></div></div>
+                            <div class="col-4"><div class="info-box text-center"><div class="info-label">Balance</div><div class="fw-bold mt-1 <?= (float)$latestInvoice['balance']>0?'text-danger':'' ?>">₱<?= number_format((float)$latestInvoice['balance'],2) ?></div></div></div>
+                        </div>
+                        <?php if ((float)$latestInvoice['balance'] > 0): ?>
+                        <div class="mt-3 p-3 rounded-2" style="background:#f9f9f9;border:1px solid #e8e8e8;font-size:.82rem;">
+                            <div class="fw-semibold mb-1"><i class="bi bi-info-circle me-1"></i>How to Pay</div>
+                            <div class="text-muted">Please pay your remaining balance via GCash or bank transfer and contact the studio to confirm. Bring your receipt on your event day.</div>
                         </div>
                         <?php endif; ?>
-                    <?php endif; ?>
+                    </div>
                 </div>
+                <?php endif; ?>
 
-            </div><!-- /col-lg-7 -->
+            </div>
 
-            <!-- ── Right col: Quick Links ─────────────────── -->
+            <!-- Right col -->
             <div class="col-lg-5">
-                <div class="portal-card p-4">
-                    <div class="section-title">Quick Links</div>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <a href="bookings.php" class="quick-btn w-100">
-                                <i class="bi bi-plus-circle"></i>
-                                Book a Service
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="bookings.php" class="quick-btn w-100">
-                                <i class="bi bi-calendar-check"></i>
-                                My Bookings
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="invoices.php" class="quick-btn w-100">
-                                <i class="bi bi-receipt"></i>
-                                My Invoices
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="downloads.php" class="quick-btn w-100">
-                                <i class="bi bi-cloud-download"></i>
-                                Download Files
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="post_production.php" class="quick-btn w-100">
-                                <i class="bi bi-film"></i>
-                                Production Status
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <a href="../logout.php" class="quick-btn w-100"
-                               style="border-color:#f5c6cb;">
-                                <i class="bi bi-box-arrow-right" style="color:#dc3545;"></i>
-                                <span style="color:#dc3545;">Logout</span>
-                            </a>
+
+                <!-- Quick Links -->
+                <div class="dash-card mb-4">
+                    <div class="dash-card-header"><h6>Quick Links</h6></div>
+                    <div class="dash-card-body">
+                        <div class="row g-2">
+                            <?php
+                            $links = [
+                                ['Book a Service',     'bi-plus-circle',   'booking_create.php', ''],
+                                ['My Bookings',        'bi-calendar-check','bookings.php',        ''],
+                                ['Invoices & Payment', 'bi-receipt',       'invoices.php',        ''],
+                                ['Download Files',     'bi-cloud-download','downloads.php',       ''],
+                                ['Production Status',  'bi-film',          'post_production.php', ''],
+                                ['Logout',             'bi-box-arrow-right','../logout.php',      'danger-btn'],
+                            ];
+                            foreach ($links as [$lbl,$ico,$href,$cls]):
+                            ?>
+                            <div class="col-6">
+                                <a href="<?= $href ?>" class="quick-btn <?= $cls ?> w-100">
+                                    <i class="bi <?= $ico ?>"></i>
+                                    <?= $lbl ?>
+                                </a>
+                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
 
-                <!-- Studio contact card -->
-                <div class="portal-card p-4 mt-4">
-                    <div class="section-title">Contact the Studio</div>
-                    <div style="font-size:.875rem;" class="d-flex flex-column gap-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-geo-alt" style="color:var(--gold);width:18px;"></i>
-                            <span>Brgy. San Antonio, Biñan, Laguna</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-envelope" style="color:var(--gold);width:18px;"></i>
-                            <a href="mailto:info@harvymancefilms.com"
-                               class="text-decoration-none text-dark">
-                                info@harvymancefilms.com
-                            </a>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="bi bi-facebook" style="color:var(--gold);width:18px;"></i>
-                            <span>Harvy Mance Films</span>
+                <!-- Contact -->
+                <div class="dash-card">
+                    <div class="dash-card-header"><h6>Contact the Studio</h6></div>
+                    <div class="dash-card-body">
+                        <div class="d-flex flex-column gap-3" style="font-size:.875rem;">
+                            <?php
+                            $contacts = [
+                                ['bi-geo-alt',  'Location', 'Brgy. San Antonio, Biñan, Laguna', '', ''],
+                                ['bi-envelope', 'Email',    'info@harvymancefilms.com', 'mailto:info@harvymancefilms.com', ''],
+                                ['bi-facebook', 'Facebook', 'Harvy Mance Films', '', ''],
+                            ];
+                            foreach ($contacts as [$icon,$label,$text,$href,$_]):
+                            ?>
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="avatar-sm"><i class="bi <?= $icon ?>"></i></div>
+                                <div>
+                                    <div class="info-label"><?= $label ?></div>
+                                    <?php if ($href): ?>
+                                        <a href="<?= $href ?>" class="d-block text-decoration-none text-dark fw-medium mt-1"><?= htmlspecialchars($text) ?></a>
+                                    <?php else: ?>
+                                        <div class="fw-medium mt-1"><?= htmlspecialchars($text) ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
 
-            </div><!-- /col-lg-5 -->
-
-        </div><!-- /row -->
-    </div><!-- /content -->
-</div><!-- /client-main -->
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('client-sidebar').classList.toggle('show'));
+</script>
 </body>
 </html>

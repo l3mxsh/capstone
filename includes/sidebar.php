@@ -1,27 +1,27 @@
 <?php
-// $activePage must be set before including this file.
-// Accepted values: dashboard, packages, bookings, staff,
-//                  cancellations, post_production, clients, reports
 $activePage = $activePage ?? '';
-
 $navItems = [
-    'dashboard'      => ['label' => 'Dashboard',       'icon' => 'bi-speedometer2',      'href' => 'dashboard.php'],
-    'packages'       => ['label' => 'Packages',         'icon' => 'bi-box-seam',           'href' => 'packages.php'],
-    'bookings'       => ['label' => 'Bookings',         'icon' => 'bi-calendar-check',     'href' => 'bookings.php'],
-    'staff'          => ['label' => 'Staff',            'icon' => 'bi-people',             'href' => 'staff.php'],
-    'cancellations'  => ['label' => 'Cancellations',   'icon' => 'bi-x-circle',           'href' => 'cancellations.php'],
-    'post_production'=> ['label' => 'Post-Production', 'icon' => 'bi-film',               'href' => 'post_production.php'],
-    'clients'        => ['label' => 'Clients',          'icon' => 'bi-person-lines-fill',  'href' => 'clients.php'],
-    'reports'        => ['label' => 'Reports',          'icon' => 'bi-bar-chart-line',     'href' => 'reports.php'],
+    'dashboard'       => ['label' => 'Dashboard',       'icon' => 'bi-speedometer2',     'href' => 'dashboard.php'],
+    'packages'        => ['label' => 'Packages',         'icon' => 'bi-box-seam',          'href' => 'packages.php'],
+    'bookings'        => ['label' => 'Bookings',         'icon' => 'bi-calendar-check',    'href' => 'bookings.php'],
+    'staff'           => ['label' => 'Staff',            'icon' => 'bi-people',            'href' => 'staff.php'],
+    'cancellations'   => ['label' => 'Cancellations',   'icon' => 'bi-x-circle',          'href' => 'cancellations.php'],
+    'post_production' => ['label' => 'Post-Production', 'icon' => 'bi-film',              'href' => 'post_production.php'],
+    'clients'         => ['label' => 'Clients',          'icon' => 'bi-person-lines-fill', 'href' => 'clients.php'],
+    'reports'         => ['label' => 'Reports',          'icon' => 'bi-bar-chart-line',    'href' => 'reports.php'],
 ];
 ?>
 <nav id="sidebar">
     <div class="brand">
-        Harvy Mance Films
-        <small>Admin Panel</small>
+        <span class="brand-logo">HMF</span>
+        <div>
+            <div class="brand-name">Harvy Mance Films</div>
+            <div class="brand-sub">Admin Panel</div>
+        </div>
     </div>
 
-    <nav class="nav flex-column py-2 flex-grow-1">
+    <div class="nav-section-label">Menu</div>
+    <nav class="nav flex-column flex-grow-1 pb-2">
         <?php foreach ($navItems as $key => $item): ?>
             <a href="<?= $item['href'] ?>"
                class="nav-link <?= $activePage === $key ? 'active' : '' ?>">
@@ -31,9 +31,9 @@ $navItems = [
         <?php endforeach; ?>
     </nav>
 
-    <nav class="nav flex-column pb-3">
+    <div class="sidebar-footer">
         <a href="../logout.php" class="nav-link logout-link">
             <i class="bi bi-box-arrow-left"></i> Logout
         </a>
-    </nav>
+    </div>
 </nav>
