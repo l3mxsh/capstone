@@ -10,15 +10,12 @@ $navItems = [
     'invoices'        => ['label' => 'Invoices',         'icon' => 'bi-receipt',           'href' => 'invoices.php'],
     'clients'         => ['label' => 'Clients',          'icon' => 'bi-person-lines-fill', 'href' => 'clients.php'],
     'reports'         => ['label' => 'Reports',          'icon' => 'bi-bar-chart-line',    'href' => 'reports.php'],
+    'profile'         => ['label' => 'Profile Settings', 'icon' => 'bi-person-gear',       'href' => 'profile.php'],
 ];
 ?>
 <nav id="sidebar">
-    <div class="brand">
-        <span class="brand-logo">HMF</span>
-        <div>
-            <div class="brand-name">Harvy Mance Films</div>
-            <div class="brand-sub">Admin Panel</div>
-        </div>
+    <div class="brand" style="justify-content:center;">
+        <img src="../assets/images/Logo.png" alt="Harvy Mance Films" style="height:60px;object-fit:contain;">
     </div>
 
     <div class="nav-section-label">Menu</div>

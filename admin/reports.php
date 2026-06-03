@@ -40,7 +40,7 @@ $months = [1=>'January',2=>'February',3=>'March',4=>'April',5=>'May',6=>'June',7
 $years  = range(2020,(int)date('Y'));
 $statusBadge = ['approved'=>'success','pending'=>'warning','rescheduled'=>'info','cancelled'=>'danger'];
 
-$pageTitle  = 'Reports — Harvy Mance Films';
+$pageTitle  = 'Reports';
 $activePage = 'reports';
 require_once '../includes/admin_head.php';
 ?>
@@ -59,7 +59,7 @@ require_once '../includes/admin_head.php';
         </div>
         <div class="d-flex align-items-center gap-2">
             <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
-            <div class="topbar-avatar"><?= strtoupper(substr($_SESSION['name'],0,1)) ?></div>
+            <?php if ($_adminAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_adminAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_adminInitial ?></div><?php endif; ?>
         </div>
     </div>
 

@@ -27,7 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — Harvy Mance Films</title>
+    <title>Login</title>
+    <link rel="icon" type="image/png" href="assets/images/Logo.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/login.css" rel="stylesheet">
@@ -36,8 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-wrap">
         <div class="login-card">
             <div class="text-center mb-4">
-                <div class="brand-logo mx-auto">HMF</div>
-                <h5 class="fw-bold mb-1" style="font-size:1.1rem;">Harvy Mance Films</h5>
+                <div class="brand-logo mx-auto" style="background:none;padding:0;width:auto;height:auto;">
+                    <img src="assets/images/Black Logo.png" alt="Harvy Mance Films" style="height:64px;object-fit:contain;">
+                </div>
                 <p class="text-muted mb-0" style="font-size:.82rem;">Sign in to your account</p>
             </div>
 

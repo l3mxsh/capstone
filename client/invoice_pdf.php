@@ -37,7 +37,7 @@ $invoiceNo   = '#' . str_pad((int)$inv['id'], 5, '0', STR_PAD_LEFT);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice <?= $invoiceNo ?> — Harvy Mance Films</title>
+    <title>Invoice <?= $invoiceNo ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --gold: #c9a84c; }
@@ -230,7 +230,7 @@ $invoiceNo   = '#' . str_pad((int)$inv['id'], 5, '0', STR_PAD_LEFT);
     <!-- Header -->
     <div class="inv-header">
         <div>
-            <div class="studio-name">Harvy Mance Films</div>
+            <img src="../assets/images/Logo.png" alt="Harvy Mance Films" style="height:60px;object-fit:contain;margin-bottom:.4rem;"><br>
             <div class="studio-meta">
                 Brgy. San Antonio, Biñan, Laguna<br>
                 info@harvymancefilms.com<br>

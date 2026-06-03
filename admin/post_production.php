@@ -66,7 +66,7 @@ $dlBadge = ['early'=>'success','near'=>'warning','late'=>'danger'];
 $dlLabel = ['early'=>'On Track','near'=>'Due Soon','late'=>'Overdue'];
 $statusBadge = ['not_started'=>'secondary','in_progress'=>'primary','completed'=>'success'];
 
-$pageTitle  = 'Post-Production — Harvy Mance Films';
+$pageTitle  = 'Post-Production';
 $activePage = 'post_production';
 require_once '../includes/admin_head.php';
 ?>
@@ -105,7 +105,7 @@ require_once '../includes/admin_head.php';
                 </button>
             <?php endif; ?>
             <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
-            <div class="topbar-avatar"><?= strtoupper(substr($_SESSION['name'],0,1)) ?></div>
+            <?php if ($_adminAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_adminAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_adminInitial ?></div><?php endif; ?>
         </div>
     </div>
 

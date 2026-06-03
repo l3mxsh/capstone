@@ -75,7 +75,7 @@ $clients = $pdo->query("
 
 $flash = $_SESSION['flash'] ?? null;
 unset($_SESSION['flash']);
-$pageTitle  = 'Clients — Harvy Mance Films';
+$pageTitle  = 'Clients';
 $activePage = 'clients';
 require_once '../includes/admin_head.php';
 ?>
@@ -110,7 +110,7 @@ require_once '../includes/admin_head.php';
             </div>
             <div class="d-flex align-items-center gap-2">
                 <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
-                <div class="topbar-avatar"><?= strtoupper(substr($_SESSION['name'], 0, 1)) ?></div>
+                <?php if ($_adminAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_adminAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_adminInitial ?></div><?php endif; ?>
             </div>
         </div>
 

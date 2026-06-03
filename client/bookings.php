@@ -73,7 +73,7 @@ require_once '../includes/client_head.php';
             <a href="booking_create.php" class="btn btn-dark btn-sm px-3">
                 <i class="bi bi-plus-lg me-1"></i> Book a Service
             </a>
-            <div class="topbar-avatar"><?= htmlspecialchars($initials) ?></div>
+            <?php if ($_clientAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_clientAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_clientInitial ?></div><?php endif; ?>
         </div>
     </div>
 

@@ -105,17 +105,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account — Harvy Mance Films</title>
+    <title>Create Account</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="css/login.css" rel="stylesheet">
     <style>
         /* Register-specific overrides */
-        .login-card  { max-width: 480px; }
-        .login-wrap  { max-width: 480px; }
+        .login-card {
+            max-width: 480px;
+        }
+
+        .login-wrap {
+            max-width: 480px;
+        }
 
         .strength-bar {
             height: 4px;
@@ -124,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow: hidden;
             margin-top: .4rem;
         }
+
         .strength-fill {
             height: 100%;
             border-radius: 4px;
@@ -139,15 +146,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             gap: .35rem;
             transition: color .2s;
         }
-        .req-item.met     { color: #27ae60; }
-        .req-item.unmet   { color: #aaa; }
-        .req-item i       { font-size: .75rem; }
+
+        .req-item.met {
+            color: #27ae60;
+        }
+
+        .req-item.unmet {
+            color: #aaa;
+        }
+
+        .req-item i {
+            font-size: .75rem;
+        }
 
         .form-control.is-invalid {
             background-image: none;
         }
     </style>
 </head>
+
 <body>
     <div class="login-wrap" style="max-width:480px;">
         <div class="login-card">
@@ -163,11 +180,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- General error -->
             <?php if (isset($errors['general'])): ?>
-            <div class="d-flex align-items-center gap-2 p-3 mb-3 rounded-2"
-                 style="background:#fef2f2;border:1px solid #fecaca;font-size:.82rem;color:#c0392b;">
-                <i class="bi bi-x-circle-fill flex-shrink-0"></i>
-                <span><?= htmlspecialchars($errors['general']) ?></span>
-            </div>
+                <div class="d-flex align-items-center gap-2 p-3 mb-3 rounded-2"
+                    style="background:#fef2f2;border:1px solid #fecaca;font-size:.82rem;color:#c0392b;">
+                    <i class="bi bi-x-circle-fill flex-shrink-0"></i>
+                    <span><?= htmlspecialchars($errors['general']) ?></span>
+                </div>
             <?php endif; ?>
 
             <form method="POST" id="registerForm" novalidate>
@@ -177,11 +194,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mb-3">
                     <label class="form-label" for="name">Full Name <span class="text-danger">*</span></label>
                     <input type="text"
-                           class="form-control <?= isset($errors['name']) ? 'is-invalid' : '' ?>"
-                           id="name" name="name"
-                           value="<?= htmlspecialchars($old['name'] ?? '') ?>"
-                           placeholder="e.g. Juan dela Cruz"
-                           required autofocus>
+                        class="form-control <?= isset($errors['name']) ? 'is-invalid' : '' ?>"
+                        id="name" name="name"
+                        value="<?= htmlspecialchars($old['name'] ?? '') ?>"
+                        placeholder="e.g. Juan dela Cruz"
+                        required autofocus>
                     <?php if (isset($errors['name'])): ?>
                         <div class="invalid-feedback"><?= htmlspecialchars($errors['name']) ?></div>
                     <?php endif; ?>
@@ -191,11 +208,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mb-3">
                     <label class="form-label" for="email">Email Address <span class="text-danger">*</span></label>
                     <input type="email"
-                           class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
-                           id="email" name="email"
-                           value="<?= htmlspecialchars($old['email'] ?? '') ?>"
-                           placeholder="you@email.com"
-                           required>
+                        class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
+                        id="email" name="email"
+                        value="<?= htmlspecialchars($old['email'] ?? '') ?>"
+                        placeholder="you@email.com"
+                        required>
                     <?php if (isset($errors['email'])): ?>
                         <div class="invalid-feedback"><?= htmlspecialchars($errors['email']) ?></div>
                     <?php endif; ?>
@@ -208,10 +225,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span class="text-muted" style="font-size:.75rem;font-weight:400;">(optional)</span>
                     </label>
                     <input type="tel"
-                           class="form-control"
-                           id="phone" name="phone"
-                           value="<?= htmlspecialchars($old['phone'] ?? '') ?>"
-                           placeholder="09XX-XXX-XXXX">
+                        class="form-control"
+                        id="phone" name="phone"
+                        value="<?= htmlspecialchars($old['phone'] ?? '') ?>"
+                        placeholder="09XX-XXX-XXXX">
                 </div>
 
                 <!-- Password -->
@@ -219,15 +236,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
                     <div class="position-relative">
                         <input type="password"
-                               class="form-control pe-5 <?= isset($errors['password']) ? 'is-invalid' : '' ?>"
-                               id="password" name="password"
-                               placeholder="Min. 8 characters"
-                               oninput="checkStrength(this.value)"
-                               required>
+                            class="form-control pe-5 <?= isset($errors['password']) ? 'is-invalid' : '' ?>"
+                            id="password" name="password"
+                            placeholder="Min. 8 characters"
+                            oninput="checkStrength(this.value)"
+                            required>
                         <button type="button"
-                                class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent me-2 text-muted"
-                                onclick="togglePwd('password','pwdIcon1')"
-                                style="font-size:.9rem;cursor:pointer;z-index:5;" tabindex="-1">
+                            class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent me-2 text-muted"
+                            onclick="togglePwd('password','pwdIcon1')"
+                            style="font-size:.9rem;cursor:pointer;z-index:5;" tabindex="-1">
                             <i class="bi bi-eye" id="pwdIcon1"></i>
                         </button>
                     </div>
@@ -257,15 +274,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label" for="confirm">Confirm Password <span class="text-danger">*</span></label>
                     <div class="position-relative">
                         <input type="password"
-                               class="form-control pe-5 <?= isset($errors['confirm']) ? 'is-invalid' : '' ?>"
-                               id="confirm" name="confirm"
-                               placeholder="Re-enter your password"
-                               oninput="checkMatch()"
-                               required>
+                            class="form-control pe-5 <?= isset($errors['confirm']) ? 'is-invalid' : '' ?>"
+                            id="confirm" name="confirm"
+                            placeholder="Re-enter your password"
+                            oninput="checkMatch()"
+                            required>
                         <button type="button"
-                                class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent me-2 text-muted"
-                                onclick="togglePwd('confirm','pwdIcon2')"
-                                style="font-size:.9rem;cursor:pointer;z-index:5;" tabindex="-1">
+                            class="position-absolute top-50 end-0 translate-middle-y border-0 bg-transparent me-2 text-muted"
+                            onclick="togglePwd('confirm','pwdIcon2')"
+                            style="font-size:.9rem;cursor:pointer;z-index:5;" tabindex="-1">
                             <i class="bi bi-eye" id="pwdIcon2"></i>
                         </button>
                     </div>
@@ -310,19 +327,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         function checkStrength(val) {
-            const hasLen   = val.length >= 8;
+            const hasLen = val.length >= 8;
             const hasUpper = /[A-Z]/.test(val);
-            const hasNum   = /[0-9]/.test(val);
+            const hasNum = /[0-9]/.test(val);
 
-            setReq('req-len',   hasLen);
+            setReq('req-len', hasLen);
             setReq('req-upper', hasUpper);
-            setReq('req-num',   hasNum);
+            setReq('req-num', hasNum);
 
             const score = [hasLen, hasUpper, hasNum].filter(Boolean).length;
-            const fill  = document.getElementById('strengthFill');
-            const pct   = score === 0 ? 0 : score === 1 ? 33 : score === 2 ? 66 : 100;
+            const fill = document.getElementById('strengthFill');
+            const pct = score === 0 ? 0 : score === 1 ? 33 : score === 2 ? 66 : 100;
             const color = score === 1 ? '#c0392b' : score === 2 ? '#e67e22' : '#27ae60';
-            fill.style.width      = pct + '%';
+            fill.style.width = pct + '%';
             fill.style.background = pct === 0 ? '#e8e8e8' : color;
 
             checkMatch();
@@ -335,19 +352,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         function checkMatch() {
-            const pwd  = document.getElementById('password').value;
+            const pwd = document.getElementById('password').value;
             const conf = document.getElementById('confirm').value;
-            const msg  = document.getElementById('matchMsg');
-            if (!conf) { msg.style.display = 'none'; return; }
+            const msg = document.getElementById('matchMsg');
+            if (!conf) {
+                msg.style.display = 'none';
+                return;
+            }
             msg.style.display = 'block';
             if (pwd === conf) {
                 msg.style.color = '#27ae60';
-                msg.innerHTML   = '<i class="bi bi-check-circle-fill me-1"></i>Passwords match';
+                msg.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Passwords match';
             } else {
                 msg.style.color = '#c0392b';
-                msg.innerHTML   = '<i class="bi bi-x-circle-fill me-1"></i>Passwords do not match';
+                msg.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>Passwords do not match';
             }
         }
     </script>
 </body>
+
 </html>

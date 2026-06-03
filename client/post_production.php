@@ -32,7 +32,7 @@ require_once '../includes/client_head.php';
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <div class="topbar-avatar"><?= htmlspecialchars($initials) ?></div>
+            <?php if ($_clientAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_clientAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_clientInitial ?></div><?php endif; ?>
             <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
         </div>
     </div>

@@ -2,7 +2,7 @@
 require_once '../auth/admin_guard.php';
 require_once '../config/db.php';
 
-$pageTitle  = 'Admin Dashboard — Harvy Mance Films';
+$pageTitle  = 'Admin Dashboard';
 $activePage = 'dashboard';
 
 $totalToday     = $pdo->query("SELECT COUNT(*) FROM bookings WHERE DATE(created_at) = CURDATE()")->fetchColumn();
@@ -62,13 +62,8 @@ require_once '../includes/admin_head.php';
                     <input type="search" placeholder="Search…">
                 </div>
                 <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
-                <div class="d-flex align-items-center gap-2 ms-1">
-                    <div class="topbar-avatar"><?= htmlspecialchars($adminInitial) ?></div>
-                    <div class="d-none d-sm-block lh-sm">
-                        <div style="font-size:.83rem;font-weight:600;"><?= htmlspecialchars($_SESSION['name']) ?></div>
-                        <div style="font-size:.7rem;color:#888;">Administrator</div>
-                    </div>
-                </div>
+                <?php if ($_adminAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_adminAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_adminInitial ?></div><?php endif; ?>
+
             </div>
         </div>
 
