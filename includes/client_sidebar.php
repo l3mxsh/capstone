@@ -1,12 +1,13 @@
 <?php
 $activeClientPage = $activeClientPage ?? '';
 $navItems = [
-    'dashboard'       => ['label' => 'Dashboard',       'icon' => 'bi-house',          'href' => 'dashboard.php'],
-    'bookings'        => ['label' => 'My Bookings',      'icon' => 'bi-calendar-check', 'href' => 'bookings.php'],
-    'post_production' => ['label' => 'Post-Production', 'icon' => 'bi-film',           'href' => 'post_production.php'],
-    'invoices'        => ['label' => 'Invoices',         'icon' => 'bi-receipt',        'href' => 'invoices.php'],
-    'downloads'       => ['label' => 'Downloads',        'icon' => 'bi-cloud-download', 'href' => 'downloads.php'],
-    'profile'         => ['label' => 'Profile Settings', 'icon' => 'bi-person-gear',    'href' => 'profile.php'],
+    'dashboard'       => ['label' => 'Dashboard',          'icon' => 'bi-house',          'href' => 'dashboard.php'],
+    'bookings'        => ['label' => 'My Bookings',        'icon' => 'bi-calendar-check', 'href' => 'bookings.php'],
+    'cancellations'   => ['label' => 'My Cancellations',  'icon' => 'bi-x-circle',       'href' => 'cancellations.php'],
+    'post_production' => ['label' => 'Post-Production',   'icon' => 'bi-film',           'href' => 'post_production.php'],
+    'invoices'        => ['label' => 'Invoices',           'icon' => 'bi-receipt',        'href' => 'invoices.php'],
+    'downloads'       => ['label' => 'Downloads',          'icon' => 'bi-cloud-download', 'href' => 'downloads.php'],
+    'profile'         => ['label' => 'Profile Settings',  'icon' => 'bi-person-gear',    'href' => 'profile.php'],
 ];
 ?>
 <nav id="client-sidebar">

@@ -28,13 +28,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($action === 'update_payment') {
-        $id          = (int)($_POST['id'] ?? 0);
-        $depositPaid = (float)($_POST['deposit_paid'] ?? 0);
-        $amount      = (float)$pdo->query("SELECT amount FROM invoices WHERE id=$id")->fetchColumn();
-        $balance     = $amount - $depositPaid;
-        $status      = $balance <= 0 ? 'paid' : ($depositPaid > 0 ? 'partial' : 'unpaid');
-        $pdo->prepare("UPDATE invoices SET deposit_paid=?,balance=?,status=? WHERE id=?")
-            ->execute([$depositPaid, $balance, $status, $id]);
+        $id                  = (int)($_POST['id'] ?? 0);
+        $depositPaid         = (float)($_POST['deposit_paid'] ?? 0);
+        $paymentInstructions = trim($_POST['payment_instructions'] ?? '');
+        $amount              = (float)$pdo->query("SELECT amount FROM invoices WHERE id=$id")->fetchColumn();
+        $balance             = $amount - $depositPaid;
+        $status              = $balance <= 0 ? 'paid' : ($depositPaid > 0 ? 'partial' : 'unpaid');
+        $pdo->prepare("UPDATE invoices SET deposit_paid=?,balance=?,status=?,payment_instructions=? WHERE id=?")
+            ->execute([$depositPaid, $balance, $status, $paymentInstructions ?: null, $id]);
         $_SESSION['flash'] = ['type' => 'success', 'msg' => 'Payment updated.'];
     }
 
@@ -69,6 +70,8 @@ $statusBadge = ['unpaid' => 'danger', 'partial' => 'warning', 'paid' => 'success
 $pageTitle  = 'Invoices';
 $activePage = 'invoices';
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 
@@ -184,7 +187,7 @@ require_once '../includes/admin_head.php';
     <?php if (!empty($uninvoiced)): ?>
         <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <form method="POST">
+                <form method="POST" class="w-100">
                     <input type="hidden" name="action" value="create">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -242,7 +245,9 @@ require_once '../includes/admin_head.php';
                             </div>
                         </div>
                         <label class="form-label">Amount Paid (₱) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" name="deposit_paid" id="pmDepositPaid" step="0.01" min="0" required>
+                        <input type="number" class="form-control mb-3" name="deposit_paid" id="pmDepositPaid" step="0.01" min="0" required>
+                        <label class="form-label">Payment Instructions <span class="text-muted" style="font-size:.78rem;">(shown to client)</span></label>
+                        <textarea class="form-control" name="payment_instructions" id="pmInstructions" rows="4" placeholder="e.g. Pay via GCash 09XX-XXX-XXXX (Harvy Mance). Send screenshot to info@harvymancefilms.com."></textarea>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
@@ -276,6 +281,7 @@ require_once '../includes/admin_head.php';
                 minimumFractionDigits: 2
             });
             document.getElementById('pmDepositPaid').value = inv.deposit_paid;
+            document.getElementById('pmInstructions').value = inv.payment_instructions ?? '';
             new bootstrap.Modal(document.getElementById('paymentModal')).show();
         }
 

@@ -99,11 +99,14 @@ CREATE TABLE IF NOT EXISTS post_production (
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS cancellations (
     id               INT AUTO_INCREMENT PRIMARY KEY,
-    booking_id       INT NOT NULL,
-    client_id        INT NOT NULL,
+    booking_id       INT           NOT NULL,
+    client_id        INT           NOT NULL,
     reason           TEXT,
     deposit_amount   DECIMAL(10,2) DEFAULT 0,
     deposit_retained DECIMAL(10,2) DEFAULT 0,
+    cancellation_status ENUM('pending_approval','approved','rejected') DEFAULT 'pending_approval',
+    initiated_by     ENUM('client','admin') DEFAULT 'client',
+    reject_reason    TEXT,
     cancelled_at     TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
     FOREIGN KEY (client_id)  REFERENCES users(id)    ON DELETE CASCADE

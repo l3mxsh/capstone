@@ -27,9 +27,11 @@ $ppStatusLabel = ['not_started' => 'Not Started', 'in_progress' => 'In Progress'
 $ppStatusColor = ['not_started' => 'secondary',   'in_progress' => 'primary',     'completed' => 'success'];
 
 $initials         = strtoupper(substr($_SESSION['name'], 0, 1));
-$pageTitle        = 'Download Files — Client Portal';
+$pageTitle        = 'Download Files';
 $activeClientPage = 'downloads';
 require_once '../includes/client_head.php';
+$_clientAvatar  ??= null;
+$_clientInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 <body>

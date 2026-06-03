@@ -36,6 +36,8 @@ $statusBadge = ['pending' => 'warning', 'approved' => 'success', 'rescheduled' =
 $adminInitial = strtoupper(substr($_SESSION['name'], 0, 1));
 
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 

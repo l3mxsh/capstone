@@ -29,9 +29,11 @@ $dlLabel       = ['early' => 'On Track', 'near' => 'Due Soon', 'late' => 'Overdu
 $invBadge      = ['unpaid' => 'danger', 'partial' => 'warning', 'paid' => 'success'];
 
 $initials = strtoupper(substr($_SESSION['name'], 0, 1));
-$pageTitle = 'Dashboard — Client Portal';
+$pageTitle = 'Dashboard';
 $activeClientPage = 'dashboard';
 require_once '../includes/client_head.php';
+$_clientAvatar  ??= null;
+$_clientInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 

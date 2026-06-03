@@ -14,9 +14,11 @@ $dlBadge = ['early'=>'success','near'=>'warning','late'=>'danger'];
 $dlLabel = ['early'=>'On Track','near'=>'Due Soon','late'=>'Overdue'];
 
 $initials = strtoupper(substr($_SESSION['name'],0,1));
-$pageTitle = 'Post-Production — Client Portal';
+$pageTitle = 'Post-Production';
 $activeClientPage = 'post_production';
 require_once '../includes/client_head.php';
+$_clientAvatar  ??= null;
+$_clientInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 <body>

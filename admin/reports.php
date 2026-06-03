@@ -43,6 +43,8 @@ $statusBadge = ['approved'=>'success','pending'=>'warning','rescheduled'=>'info'
 $pageTitle  = 'Reports';
 $activePage = 'reports';
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 <body>

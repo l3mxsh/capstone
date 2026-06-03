@@ -69,6 +69,8 @@ $statusBadge = ['not_started'=>'secondary','in_progress'=>'primary','completed'=
 $pageTitle  = 'Post-Production';
 $activePage = 'post_production';
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 <body>

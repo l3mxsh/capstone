@@ -38,13 +38,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($action === 'reject' && $id) {
-        $reason   = trim($_POST['reason'] ?? '');
-        $pdo->prepare("UPDATE bookings SET status='cancelled' WHERE id=?")->execute([$id]);
-        $clientStmt = $pdo->prepare("SELECT client_id FROM bookings WHERE id=?");
+        $reason = trim($_POST['reason'] ?? '');
+
+        // Fetch client_id before updating
+        $clientStmt = $pdo->prepare("SELECT client_id FROM bookings WHERE id = ?");
         $clientStmt->execute([$id]);
         $clientId = (int)($clientStmt->fetchColumn() ?: 0);
-        $pdo->prepare("INSERT INTO cancellations (booking_id, client_id, reason) VALUES (?, ?, ?)")->execute([$id, $clientId, $reason]);
+
+        $pdo->prepare("UPDATE bookings SET status='cancelled' WHERE id=?")->execute([$id]);
         $pdo->prepare("DELETE FROM staff_schedules WHERE booking_id=?")->execute([$id]);
+        $pdo->prepare("DELETE FROM cancellations WHERE booking_id=? AND cancellation_status='pending_approval'")->execute([$id]);
+
+        // Admin cancels directly — insert as 'approved' so it goes straight to the log
+        // and does NOT appear as a pending request in cancellations.php
+        $pdo->prepare("
+            INSERT INTO cancellations (booking_id, client_id, reason, deposit_amount, deposit_retained, cancellation_status, initiated_by)
+            VALUES (?, ?, ?, 0, 0, 'approved', 'admin')
+        ")->execute([$id, $clientId, $reason]);
+
         $_SESSION['flash'] = ['type' => 'danger', 'msg' => 'Booking has been cancelled.'];
     }
 
@@ -83,6 +94,8 @@ $statusBadge = ['pending' => 'warning', 'approved' => 'success', 'rescheduled' =
 $pageTitle  = 'Bookings';
 $activePage = 'bookings';
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 
@@ -116,7 +129,10 @@ require_once '../includes/admin_head.php';
             </div>
             <div class="d-flex align-items-center gap-2">
                 <a href="../logout.php" class="topbar-btn" title="Logout"><i class="bi bi-box-arrow-right"></i></a>
-                <?php if ($_adminAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_adminAvatar) ?>" class="topbar-avatar" style="object-fit:cover;"><?php else: ?><div class="topbar-avatar"><?= $_adminInitial ?></div><?php endif; ?>
+                <?php if ($_adminAvatar): ?><img src="../assets/avatars/<?= htmlspecialchars($_adminAvatar) ?>" class="topbar-avatar" style="object-fit:cover;">
+                <?php else: ?>
+                    <div class="topbar-avatar"><?= $_adminInitial ?></div>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -318,7 +334,7 @@ require_once '../includes/admin_head.php';
     <!-- Reject Modal -->
     <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form method="POST">
+            <form method="POST" class="w-100">
                 <input type="hidden" name="action" value="reject">
                 <input type="hidden" name="id" id="rejectId">
                 <div class="modal-content">

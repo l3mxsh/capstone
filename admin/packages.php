@@ -37,6 +37,8 @@ $flash = $_SESSION['flash'] ?? null; unset($_SESSION['flash']);
 $pageTitle  = 'Packages';
 $activePage = 'packages';
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 <body>

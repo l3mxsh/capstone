@@ -143,6 +143,8 @@ unset($_SESSION['flash']);
 $pageTitle  = 'Staff';
 $activePage = 'staff';
 require_once '../includes/admin_head.php';
+$_adminAvatar  ??= null;
+$_adminInitial ??= strtoupper(substr($_SESSION['name'], 0, 1));
 ?>
 </head>
 

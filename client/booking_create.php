@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $packages = $pdo->query("SELECT id,name,price,inclusions FROM packages WHERE status='active' ORDER BY name")->fetchAll();
 $initials = strtoupper(substr($_SESSION['name'],0,1));
-$pageTitle = 'Book a Service — Client Portal';
+$pageTitle = 'Book a Service';
 $activeClientPage = 'bookings';
 require_once '../includes/client_head.php';
 ?>
